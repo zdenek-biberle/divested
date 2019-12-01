@@ -1,0 +1,12 @@
+CXXFLAGS += \
+	-Wall \
+	-D__cdecl= \
+	-std=c++17 \
+	-Isrc
+
+.PHONY: all bin/known_messages
+
+all: bin/known_messages
+
+bin/known_messages: src/tools/known_messages.cpp
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<

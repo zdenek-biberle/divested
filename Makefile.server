@@ -1,0 +1,50 @@
+SOURCES_DIR = src
+OBJECTS_DIR = obj
+EXE_DIR = bin
+
+SOURCES = \
+	server/main \
+	common/shm/shm \
+	common/util/random_string
+
+EXE = divested-server
+
+override CXXFLAGS += \
+	-Wall \
+	-DUNICODE \
+	-mwindows \
+	-fno-short-wchar \
+	-D_UNICODE \
+	-DNONAMELESSUNION \
+	-std=c++17
+
+LDFLAGS =
+
+LIBS = \
+	shell32 \
+	rt
+
+CXX = wineg++
+
+OBJECTS_FILES = $(addprefix $(OBJECTS_DIR)/,$(addsuffix .o,$(SOURCES)))
+EXE_FILE = $(EXE_DIR)/$(EXE)
+
+all: $(EXE_FILE)
+
+clean:
+	rm $(OBJECTS_FILES) $(EXE_FILE)
+	@rmdir $(OUT)
+
+.PHONY: all clean $(EXE_FILE) force
+
+force:
+
+$(OBJECTS_DIR)/%.o: $(SOURCES_DIR)/%.cpp force
+	mkdir -p $(shell dirname $@)
+	$(CXX) -c $(CXXFLAGS) -I$(SOURCES_DIR) -o $@ $<
+
+$(EXE_FILE): $(OBJECTS_FILES)
+	mkdir -p $(EXE_DIR)
+	$(CXX) $(CSSFLAGS) $(LDFLAGS) -o $@ $(OBJECTS_FILES) $(addprefix -l,$(LIBS))
+
+
