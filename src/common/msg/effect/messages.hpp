@@ -10,6 +10,10 @@
 	F(close) \
 	F(setProgram) \
 	F(getProgram) \
+	F(getProgramName) \
+	F(getParamLabel) \
+	F(getParamDisplay) \
+	F(getParamName) \
 	F(setSampleRate) \
 	F(setBlockSize) \
 	F(mainsChanged) \
@@ -18,7 +22,7 @@
 	F(canBeAutomated) \
 	/* F(string2Parameter) */ \
 	/* F(getNumProgramCategories) */ \
-	/* F(getProgramNameIndexed) */ \
+	F(getProgramNameIndexed) \
 	/* F(copyProgram) */ \
 	/* F(connectInput) */ \
 	/* F(connectOutput) */ \
@@ -37,7 +41,7 @@
 	F(getEffectName) \
 	/* F(getErrorText) */ \
 	F(getVendorString) \
-	/* F(getProductString) */ \
+	F(getProductString) \
 	F(getVendorVersion) \
 	/* F(canDo) */ \
 	F(getTailSize) \
@@ -58,7 +62,7 @@
 	F(beginSetProgram) \
 	F(endSetProgram) \
 	/* F(getSpeakerArrangement) */ \
-	/* F(shellGetNextPlugin) */ \
+	F(shellGetNextPlugin) \
 	F(startProcess) \
 	F(stopProcess) \
 	F(setTotalSampleToProcess) \
@@ -75,10 +79,10 @@ namespace msg::effect {
 	struct setProgram : public msg<effSetProgram>, value {};
 	struct getProgram : public msg<effGetProgram>, plain_ret {};
 	// struct setProgramName : public msg<effSetProgramName> {};
-	// struct getProgramName : public msg<effGetProgramName> {};
-	// struct getParamLabel : public msg<effGetParamLabel> {};
-	// struct getParamDisplay : public msg<effGetParamDisplay> {};
-	// struct getParamName : public msg<effGetParamName> {};
+	struct getProgramName : public msg<effGetProgramName>, str_out_ptr<kVstMaxProgNameLen> {};
+	struct getParamLabel : public msg<effGetParamLabel>, index, str_out_ptr<kVstMaxParamStrLen> {};
+	struct getParamDisplay : public msg<effGetParamDisplay>, index, str_out_ptr<kVstMaxParamStrLen> {};
+	struct getParamName : public msg<effGetParamName>, index, str_out_ptr<kVstMaxParamStrLen> {};
 	// struct getVu : public msg<effGetVu> {};
 	struct setSampleRate : public msg<effSetSampleRate>, opt {};
 	struct setBlockSize : public msg<effSetBlockSize>, value {};
@@ -99,7 +103,7 @@ namespace msg::effect {
 	struct canBeAutomated : public msg<effCanBeAutomated>, index, plain_ret {};
 	// struct string2Parameter : public msg<effString2Parameter> {};
 	// struct getNumProgramCategories : public msg<effGetNumProgramCategories> {};
-	// struct getProgramNameIndexed : public msg<effGetProgramNameIndexed> {}; // TODO: needs ptr return
+	struct getProgramNameIndexed : public msg<effGetProgramNameIndexed>, index, str_out_ptr<kVstMaxProgNameLen>, plain_ret {};
 	// struct copyProgram : public msg<effCopyProgram> {};
 	// struct connectInput : public msg<effConnectInput> {};
 	// struct connectOutput : public msg<effConnectOutput> {};
@@ -118,7 +122,7 @@ namespace msg::effect {
 	struct getEffectName : public msg<effGetEffectName>, str_out_ptr<kVstMaxEffectNameLen> {};
 	// struct getErrorText : public msg<effGetErrorText> {};
 	struct getVendorString : public msg<effGetVendorString>, str_out_ptr<kVstMaxVendorStrLen> {};
-	// struct getProductString : public msg<effGetProductString> {};
+	struct getProductString : public msg<effGetProductString>, str_out_ptr<kVstMaxProductStrLen> {};
 	struct getVendorVersion : public msg<effGetVendorVersion>, plain_ret {};
 	// struct canDo : public msg<effCanDo> {};
 	struct getTailSize : public msg<effGetTailSize>, plain_ret {};
@@ -139,7 +143,7 @@ namespace msg::effect {
 	struct beginSetProgram : public msg<effBeginSetProgram> {};
 	struct endSetProgram : public msg<effEndSetProgram> {};
 	// struct getSpeakerArrangement : public msg<effGetSpeakerArrangement> {};
-	// struct shellGetNextPlugin : public msg<effShellGetNextPlugin> {};
+	struct shellGetNextPlugin : public msg<effShellGetNextPlugin>, str_out_ptr<kVstMaxProductStrLen>, plain_ret {};
 	struct startProcess : public msg<effStartProcess> {};
 	struct stopProcess : public msg<effStopProcess> {};
 	struct setTotalSampleToProcess : public msg<effSetTotalSampleToProcess>, value {};
