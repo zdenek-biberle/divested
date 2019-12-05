@@ -10,13 +10,17 @@
 	F(close) \
 	F(setProgram) \
 	F(getProgram) \
+	/* F(setProgramName) */ \
 	F(getProgramName) \
 	F(getParamLabel) \
 	F(getParamDisplay) \
 	F(getParamName) \
+	/* F(getVu) */ \
 	F(setSampleRate) \
 	F(setBlockSize) \
 	F(mainsChanged) \
+	/* F(getRect) */ \
+	/* F(editOpen) */ \
 	F(editClose) \
 	F(editIdle) \
 	F(canBeAutomated) \
