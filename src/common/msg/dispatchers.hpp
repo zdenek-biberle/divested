@@ -14,6 +14,7 @@ namespace msg {
 		VstIntPtr value;
 		void* ptr;
 		float opt;
+		log::log() << "Receiving dispatcher message " << message_name<T> << std::endl;
 		offset += read_request<T>(buf.data() + offset, index, value, ptr, opt);
 		auto shm_offset = handler.shm_offset();
 		size_t shm_size = read_request_shm<T>(handler.shm(), shm_offset, ptr);

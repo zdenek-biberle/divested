@@ -2,6 +2,7 @@
 #define MSG_SENDER_HPP
 
 #include "common/msg/base.hpp"
+#include "common/msg/message_name.hpp"
 #include "common/msg/receiver.hpp"
 #include "common/msg/type.hpp"
 
@@ -26,7 +27,7 @@ namespace msg {
 	template <typename Msg, typename Handler, size_t BufLen>
 	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, VstIntPtr response) {
 		size_t offset = 0;
-		log::log() << "Sending return for dispatcher message " << Msg::opcode << std::endl; 
+		log::log() << "Sending return for dispatcher message " << message_name<Msg> << std::endl;
 		offset += write_data(buf.data(), offset, type_t::return_);
 		offset += write_response<Msg>(buf.data() + offset, response);
 		size_t shm_size = write_response_shm<Msg>(handler.shm(), shm_offset, response);
@@ -37,7 +38,7 @@ namespace msg {
 	template <typename Msg, typename Handler, size_t BufLen>
 	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
 		size_t offset = 0;
-		log::log() << "Sending dispatcher call for message " << Msg::opcode << std::endl;
+		log::log() << "Sending dispatcher call for message " << message_name<Msg> << std::endl;
 		log::log() << "index: " << index << ", value: " << value << ", ptr: " << ptr << ", opt: " << opt << std::endl;
 		offset += write_data(buf.data(), offset, type_t::dispatcher);
 		offset += write_data(buf.data(), offset, Msg::opcode);
