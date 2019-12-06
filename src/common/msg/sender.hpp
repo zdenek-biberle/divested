@@ -50,7 +50,7 @@ namespace msg {
 
 		offset = 0;
 		offset += receive_message(handler, buf);
-		VstIntPtr response;
+		VstIntPtr response = 0;
 		offset += read_response<Msg>(buf.data() + offset, response);
 		size_t read_shm_size = read_response_shm<Msg>(handler.shm(), shm_offset, response, ptr);
 
