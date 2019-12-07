@@ -57,6 +57,11 @@ struct client_t : public handler::with_shm {
 		log::log() << "Instantiated client with send_fd " << send_fd << ", recv_fd " << recv_fd << " & shm " << _shm.name() << std::endl;
 	}
 
+	~client_t() {
+		::close(send_fd);
+		::close(recv_fd);
+	}
+
 	VstIntPtr dispatcher(VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
 
 		auto effect_ptr = state == client_state_t::created ? &effect : nullptr;
@@ -142,6 +147,16 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 		<< std::endl;
 	auto result = msg::send_dispatcher(client, buf, opcode, index, value, ptr, opt);
 	log::log() << "aeffect_dispatcher_proc finished with result " << result << std::endl;
+
+	// If we got an effClose message, we should send a return to the server so that
+	// it finishes. We should also cleanup after ourselves.
+	if (opcode == effClose) {
+		log::log() << "Stopping the server and cleaning up" << std::endl;
+		msg::send_return(client, buf);
+		delete &client;
+		log::log() << "Cleaned up" << std::endl;
+	}
+
 	return result;
 }
 

@@ -47,6 +47,11 @@ struct server_t : public handler::with_shm {
 		log() << "Instantiated server with send_fd " << send_fd << ", recv_fd " << recv_fd << " and shm " << _shm.name() << std::endl;
 	}
 
+	~server_t() {
+		::close(send_fd);
+		::close(recv_fd);
+	}
+
 	std::ostream &log() {
 		return std::cerr << "SERVER: ";
 	}
@@ -88,6 +93,8 @@ struct server_t : public handler::with_shm {
 
 		// ...and then just process messages
 		msg::receive_message(*this, buf);
+
+		log::log() << "Finished" << std::endl;
 	}
 };
 
@@ -157,21 +164,25 @@ int actual_win_main() {
 	vst_plugin_main_t vst_plugin_main = (vst_plugin_main_t) GetProcAddress(lib, "VSTPluginMain");
 	std::cout << "SERVER: vst plugin main: " << vst_plugin_main << std::endl;
 
-	// instantiate the server
-	auto server = new server_t{send_fd, recv_fd, std::move(shm)};
+	{
+		// instantiate the server
+		server_t server{send_fd, recv_fd, std::move(shm)};
 
-	// initialize the globals for audio master
-	globals.server = server;
-	AEffect *effect = vst_plugin_main(&audio_master);
+		// initialize the globals for audio master
+		globals.server = &server;
+		AEffect *effect = vst_plugin_main(&audio_master);
 
-	if (!effect)
-		throw std::runtime_error("SERVER: Got null effect");
+		if (!effect)
+			throw std::runtime_error("SERVER: Got null effect");
 
-	// store the AEffect pointer inside server
-	server->effect = effect;
+		// store the AEffect pointer inside server
+		server.effect = effect;
 
-	printf("effect: %p\n", effect);
-	server->run();
+		printf("effect: %p\n", effect);
+		server.run();
+	}
+
+	log::log() << "Destroyed" << std::endl;
 
 	return 0;
 }

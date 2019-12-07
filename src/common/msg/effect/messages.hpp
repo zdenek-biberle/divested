@@ -79,7 +79,7 @@
 
 namespace msg::effect {
 	struct open : public msg<effOpen> {};
-	struct close : public msg<effClose> {};
+	struct close : public msg<effClose>, plain_ret {};
 	struct setProgram : public msg<effSetProgram>, value {};
 	struct getProgram : public msg<effGetProgram>, plain_ret {};
 	// struct setProgramName : public msg<effSetProgramName> {};
