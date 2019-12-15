@@ -176,7 +176,66 @@ namespace msg {
 		static inline std::ostream &show_response(std::ostream &os, char **ptr, const dispatcher_response &response) {
 			return os << "chunk(" << response.response << ")";
 		}
-	
+	};
+
+	/// This is used for effEditGetRect, which takes a pointer to a pointer to an ERect.
+	/// Its job is to point the pointer either to null or to a valid ERect.
+	/// There's no mention of ever freeing this ERect, so we'll just assume
+	/// that there is only a single one that lives as part of the plugin state.
+	///
+	/// Similarly to chunk_out, we store the pointer whose address is passed to
+	/// the plugin in shm.
+	struct rect_out {
+		template <typename Ctx>
+		static void write_request(const Ctx &ctx, ERect **ptr) {
+			// ignore the value of ptr, just write a single nullptr to the
+			// shared memory
+			ctx.shm.template write_data<ERect *>(nullptr);
+		}
+
+		template <typename Ctx>
+		static void read_request(const Ctx &ctx, ERect **&ptr) {
+			// map ptr so that it points to the pointer in shm, the plugin
+			// will then fill in that pointer
+			ctx.shm.map_data_array(ptr, 1);
+		}
+
+		template <typename Ctx>
+		static void write_response(const Ctx &ctx, ERect **ptr, const dispatcher_response &response) {
+			// ptr now points to the pointer to the ERect - we leave that in shm and, if present,
+			// add the ERect itself
+			ctx.shm.template skip_data<ERect *>();
+			if (*ptr)
+				ctx.shm.write_data(**ptr);
+		}
+
+		template <typename Ctx>
+		static void read_response(const Ctx &ctx, ERect **ptr, const dispatcher_response &response) {
+			// now, read the pointer - if it's not null, read the ERect
+			// keep in mind that erect_ptr has no meaning here - we'll just use
+			// it to decide if it's null or not
+			ERect *rect_ptr;
+			ctx.shm.read_data(rect_ptr);
+
+			if (rect_ptr) {
+				ERect &rect = ctx.allocator.get_rect();
+				ctx.shm.read_data(rect);
+				*ptr = &rect;
+			} else {
+				*ptr = nullptr;
+			}
+		}
+
+		static inline std::ostream &show_request(std::ostream &os, ERect **ptr) {
+			return os << reinterpret_cast<void *>(ptr);
+		}
+
+		static inline std::ostream &show_response(std::ostream &os, ERect **ptr, const dispatcher_response &response) {
+			if (auto rect = *ptr)
+				return os << "ERect{top: " << rect->top << ", left: " << rect->left << ", bottom: " << rect->bottom << ", right: " << rect->right << "}";
+			else
+				return os << "nullptr to ERect";
+		}
 	};
 }
 

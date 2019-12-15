@@ -19,7 +19,7 @@
 	F(setSampleRate) \
 	F(setBlockSize) \
 	F(mainsChanged) \
-	/* F(editGetRect) */ \
+	F(editGetRect) \
 	/* F(editOpen) */ \
 	F(editClose) \
 	/* F(editDraw) */ \
@@ -100,7 +100,7 @@ namespace msg::effect {
 	struct setSampleRate : public msg<effSetSampleRate>, opt {};
 	struct setBlockSize : public msg<effSetBlockSize>, value {};
 	struct mainsChanged : public msg<effMainsChanged>, value {};
-	// struct editGetRect : public msg<effGetRect> {};
+	struct editGetRect : public msg<effEditGetRect>, payload_ptr<casted_ptr<ERect *, rect_out>>, plain_ret {};
 	// struct editOpen : public msg<effEditOpen> {};
 	struct editClose : public msg<effEditClose> {};
 	// struct editDraw : public msg<effEditDraw> {};
@@ -110,7 +110,7 @@ namespace msg::effect {
 	// struct editTop : public msg<effEditTop> {};
 	// struct editSleep : public msg<effEditSleep> {};
 	// struct identify : public msg<effIdentify> {};
-	struct getChunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char*, chunk_out>>, plain_ret {};
+	struct getChunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char *, chunk_out>>, plain_ret {};
 	// struct setChunk : public msg<effSetChunk> {};
 	// struct processEvents : public msg<effProcessEvents> {};
 	struct canBeAutomated : public msg<effCanBeAutomated>, index, plain_ret {};

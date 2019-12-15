@@ -47,6 +47,7 @@ struct client_t : public handler::with_shm {
 	audioMasterCallback cb;
 	client_state_t state;
 	std::vector<std::unique_ptr<char[]>> allocated_chunks;
+	ERect rect;
 
 	struct message_configuration {
 		using dispatcher_received = msg::host_dispatcher;
@@ -146,6 +147,10 @@ struct client_t : public handler::with_shm {
 		auto ptr = chunk.get();
 		allocated_chunks.push_back(std::move(chunk));
 		return ptr;
+	}
+
+	ERect &get_rect() {
+		return rect;
 	}
 };
 
