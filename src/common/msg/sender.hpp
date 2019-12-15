@@ -32,7 +32,7 @@ namespace msg {
 
 		io::buf pipe{buf.data(), 0};
 		io::buf shm{handler.shm(), shm_offset};
-		auto resp_ctx = mk_payload_ctx(pipe, shm, handler);
+		payload_ctx resp_ctx{pipe, shm, handler};
 
 		pipe.write_data(type_t::return_);
 		io::write_response<Msg>(resp_ctx, request, response);
@@ -53,7 +53,7 @@ namespace msg {
 
 		io::buf req_pipe{buf.data(), 0};
 		io::buf req_shm{handler.shm(), shm_offset};
-		auto req_ctx = mk_payload_ctx(req_pipe, req_shm, handler);
+		payload_ctx req_ctx{req_pipe, req_shm, handler};
 
 		req_pipe.write_data(type_t::dispatcher);
 		io::write_request<Msg>(req_ctx, body);
@@ -65,7 +65,7 @@ namespace msg {
 
 		io::buf resp_pipe{buf.data(), resp_offset};
 		io::buf resp_shm{handler.shm(), shm_offset};
-		auto resp_ctx = mk_payload_ctx(resp_pipe, resp_shm, handler);
+		payload_ctx resp_ctx{resp_pipe, resp_shm, handler};
 
 		Response response;
 		io::read_response<Msg>(resp_ctx, body, response);

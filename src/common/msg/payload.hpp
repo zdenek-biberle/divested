@@ -15,9 +15,7 @@ namespace msg {
 	};
 
 	template <typename Pipe, typename Shm, typename Allocator>
-	auto mk_payload_ctx(Pipe &pipe, Shm &shm, Allocator &allocator) {
-		return payload_ctx<Pipe, Shm, Allocator>{pipe, shm, allocator};
-	}
+	payload_ctx(Pipe &, Shm &, Allocator &) -> payload_ctx<Pipe, Shm, Allocator>;
 
 	template <typename T, typename Sub>
 	struct casted_ptr {

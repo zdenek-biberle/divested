@@ -16,7 +16,7 @@ namespace msg {
 
 		io::buf pipe{buf.data(), offset};
 		io::buf shm{handler.shm(), shm_offset};
-		auto req_ctx = mk_payload_ctx(pipe, shm, handler);
+		payload_ctx req_ctx{pipe, shm, handler};
 		
 		io::read_request<T>(req_ctx, request);
 		handler.shm_push(shm.total());
