@@ -42,9 +42,9 @@ namespace msg {
 
 		size_t offset = 0;
 		type_t msg_type;
-		offset += read_data(buf.data(), offset, msg_type);
+		offset += io::read_data(buf.data(), offset, msg_type);
 
-		log::log() << "Got message type " << static_cast<int>(msg_type) << std::endl;
+		log::log() << "Got message type " << type_to_name(msg_type) << std::endl;
 
 		switch (msg_type) {
 			case type_t::return_:

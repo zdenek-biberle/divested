@@ -16,7 +16,8 @@ override CXXFLAGS += \
 	-fno-short-wchar \
 	-D_UNICODE \
 	-DNONAMELESSUNION \
-	-std=c++17
+	-std=c++17 \
+	-ggdb
 
 LDFLAGS =
 

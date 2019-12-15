@@ -1,6 +1,8 @@
 #ifndef MSG_SENDER_HPP
 #define MSG_SENDER_HPP
 
+#include "common/msg/io/base.hpp"
+#include "common/msg/io/buf.hpp"
 #include "common/msg/base.hpp"
 #include "common/msg/message_name.hpp"
 #include "common/msg/receiver.hpp"
@@ -11,7 +13,7 @@ namespace msg {
 	void send_return(Handler &handler, std::array<char, BufLen> &buf) {
 		size_t offset = 0;
 		log::log() << "Sending plain return" << std::endl;
-		offset += write_data(buf.data(), offset, type_t::return_);
+		offset += io::write_data(buf.data(), offset, type_t::return_);
 		handler.message_write(buf.data(), offset);
 	}
 
@@ -19,48 +21,64 @@ namespace msg {
 	void send_return_payload(Handler &handler, std::array<char, BufLen> &buf, const Payload &payload) {
 		size_t offset = 0;
 		log::log() << "Sending return with payload of size " << sizeof(Payload) << std::endl;
-		offset += write_data(buf.data(), offset, type_t::return_);
-		offset += write_data(buf.data(), offset, payload);
+		offset += io::write_data(buf.data(), offset, type_t::return_);
+		offset += io::write_data(buf.data(), offset, payload);
 		handler.message_write(buf.data(), offset);
 	}
 
 	template <typename Msg, typename Handler, size_t BufLen>
-	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, VstIntPtr response) {
-		size_t offset = 0;
+	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, size_t shm_size, void *ptr, VstIntPtr response) {
 		log::log() << "Sending return for dispatcher message " << message_name<Msg> << std::endl;
-		offset += write_data(buf.data(), offset, type_t::return_);
-		offset += write_response<Msg>(buf.data() + offset, response);
-		size_t shm_size = write_response_shm<Msg>(handler.shm(), shm_offset, response);
+
+		io::buf pipe{buf.data(), 0};
+		io::buf shm{handler.shm(), shm_offset};
+
+		pipe.write_data(type_t::return_);
+		io::write_response<Msg>(pipe, shm, ptr, response);
+
+		if (shm.total() == shm_size) {
+			log::log() << "write_response wrote " << shm.total() << " B of shm, which is the exact expected amount" << std::endl;
+		} else if (shm.total() < shm_size) {
+			log::log() << "write_response wrote " << shm.total() << " B of shm, which is less than the expected amount (" << shm_size << " B)" << std::endl;
+		} else {
+			std::stringstream ss;
+			ss << "write_reponse wrote " << shm.total() << " B of shm, which is _more_ that the expected amount (" << shm_size << " B)";
+			throw std::runtime_error(ss.str());
+		}
+
 		handler.shm_pop(shm_size);
-		handler.message_write(buf.data(), offset);	
+		handler.message_write(buf.data(), pipe.total());	
 	}
 
 	template <typename Msg, typename Handler, size_t BufLen>
 	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
-		size_t offset = 0;
 		log::log() << "Sending dispatcher call for message " << message_name<Msg> << std::endl;
 		log::log() << "index: " << index << ", value: " << value << ", ptr: " << ptr << ", opt: " << opt << std::endl;
-		offset += write_data(buf.data(), offset, type_t::dispatcher);
-		offset += write_data(buf.data(), offset, Msg::opcode);
-		offset += write_request<Msg>(buf.data() + offset, index, value, ptr, opt);
+
 		size_t shm_offset = handler.shm_offset();
-		size_t written_shm_size = write_request_shm<Msg>(handler.shm(), shm_offset, ptr);
-		handler.shm_push(written_shm_size);
-		handler.message_write(buf.data(), offset);
 
-		offset = 0;
-		offset += receive_message(handler, buf);
+		io::buf req_pipe{buf.data(), 0};
+		io::buf req_shm{handler.shm(), shm_offset};
+
+		req_pipe.write_data(type_t::dispatcher);
+		req_pipe.write_data(Msg::opcode);
+		io::write_request<Msg>(req_pipe, req_shm, index, value, ptr, opt);
+
+		handler.shm_push(req_shm.total());
+		handler.message_write(buf.data(), req_pipe.total());
+
+		auto resp_offset = receive_message(handler, buf);
+
+		io::buf resp_pipe{buf.data(), resp_offset};
+		io::buf resp_shm{handler.shm(), shm_offset};
+
 		VstIntPtr response = 0;
-		offset += read_response<Msg>(buf.data() + offset, response);
-		size_t read_shm_size = read_response_shm<Msg>(handler.shm(), shm_offset, response, ptr);
+		io::read_response<Msg>(resp_pipe, resp_shm, ptr, response);
 
-		if (written_shm_size != read_shm_size) {
-			std::stringstream ss;
-			ss << "Written shm size (" << written_shm_size << " B) does not equal read shm size (" << read_shm_size << " B)";
-			throw std::runtime_error(ss.str());
-		}
+		if (req_shm.total() != resp_shm.total())
+			log::log() << "Written shm size (" << req_shm.total() << " B) does not equal read shm size (" << resp_shm.total() << " B)" << std::endl;
 
-		handler.shm_pop(read_shm_size);
+		handler.shm_pop(req_shm.total());
 
 		return response;
 	}

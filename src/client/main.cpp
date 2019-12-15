@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include "pluginterfaces/vst2.x/aeffect.h"
 #include "common/handler/shm.hpp"
+#include "common/msg/io/base.hpp"
 #include "common/msg/master/messages.hpp"
 #include "common/msg/dispatchers.hpp"
 #include "common/msg/receiver.hpp"
@@ -102,7 +103,7 @@ struct client_t : public handler::with_shm {
 
 		std::array<char, 2048> buf;
 		size_t offset = msg::receive_message(*this, buf);
-		msg::read_data(buf.data(), offset, effect);
+		msg::io::read_data(buf.data(), offset, effect);
 
 		log::log() << "Received AEffect, patching..." << std::endl;
 

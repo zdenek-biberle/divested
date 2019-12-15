@@ -11,8 +11,8 @@ namespace handler {
 			_shm_offset{0}
 		{}
 
-		inline void *shm() const {
-			return _shm.memory();
+		inline char *shm() const {
+			return reinterpret_cast<char *>(_shm.memory());
 		}
 
 		inline size_t shm_offset() const {

@@ -80,10 +80,6 @@ struct server_t : public handler::with_shm {
 		return writelen;
 	}
 
-	void *shm() {
-		return _shm.memory();
-	}
-
 	/// Returns the effect to the client
 	void run() {
 		std::array<char, 2048> buf;
@@ -117,9 +113,6 @@ std::string wstr_conv(const WCHAR *str) {
 }
 
 int actual_win_main() {
-	std::cout.rdbuf()->pubsetbuf(0, 0);
-	std::cerr.rdbuf()->pubsetbuf(0, 0);
-
 	LPWSTR cmd_line = GetCommandLineW();
 	int argc;
 	LPWSTR *argv = CommandLineToArgvW(cmd_line, &argc);

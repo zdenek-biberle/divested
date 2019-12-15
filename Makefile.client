@@ -13,7 +13,8 @@ override CXXFLAGS += \
 	-Wall \
 	-D__cdecl= \
 	-std=c++17 \
-	-fPIC
+	-fPIC \
+	-ggdb
 
 LDFLAGS = \
 	-shared

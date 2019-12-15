@@ -2,6 +2,8 @@
 #define MSG_DISPATCHERS_HPP
 
 #include "common/msg/effect/messages.hpp"
+#include "common/msg/io/buf.hpp"
+#include "common/msg/io/msg.hpp"
 #include "common/msg/master/messages.hpp"
 #include "common/msg/base.hpp"
 #include "common/msg/receiver.hpp"
@@ -10,20 +12,34 @@
 namespace msg {
 	template <typename T, typename Handler, size_t BufLen>
 	static void receive_dispatcher_message(Handler &handler, std::array<char, BufLen> &buf, size_t offset) {
-		VstInt32 index;
-		VstIntPtr value;
-		void* ptr;
-		float opt;
+		VstInt32 index = 0;
+		VstIntPtr value = 0;
+		void* ptr = nullptr;
+		float opt = 0.f;
 		log::log() << "Receiving dispatcher message " << message_name<T> << std::endl;
-		offset += read_request<T>(buf.data() + offset, index, value, ptr, opt);
+
 		auto shm_offset = handler.shm_offset();
-		size_t shm_size = read_request_shm<T>(handler.shm(), shm_offset, ptr);
-		handler.shm_push(shm_size);
-		log::log() << "Read " << offset << " B in total" << std::endl;
-		log::log() << "Read " << shm_size << " B of shm at offset " << shm_offset << std::endl;
+
+		io::buf pipe{buf.data(), offset};
+		io::buf shm{handler.shm(), shm_offset};
+		
+		io::read_request<T>(pipe, shm, index, value, ptr, opt);
+		handler.shm_push(shm.total());
+
+		log::log() << "Read dispatcher request, index: " << index << ", value: " << value << ", ptr: " << ptr << ", opt: " << opt << std::endl;
+		if constexpr (has_payload_ptr<T>)
+			T::payload::show_request(log::log() << "ptr content: ", ptr) << std::endl;
+
+		log::log() << "Read " << pipe.offset << " B in total" << std::endl;
+		log::log() << "Read " << shm.total() << " B of shm at offset " << shm_offset << std::endl;
 		auto response = handler.dispatcher(T::opcode, index, value, ptr, opt);
+
+		log::log() << "Dispatcher called, result: " << response << std::endl;
+		if constexpr (has_payload_ptr<T>)
+			T::payload::show_response(log::log() << "ptr content: ", ptr) << std::endl;
+
 		// TODO: cleanup response data
-		send_return_dispatcher<T>(handler, buf, shm_offset, response);
+		send_return_dispatcher<T>(handler, buf, shm_offset, shm.total(), ptr, response);
 	}
 
 	[[noreturn]] static void throw_unknown_opcode(const char *prefix, VstInt32 opcode) {
@@ -39,7 +55,7 @@ namespace msg {
 		template <typename Handler, size_t BufLen>
 		static void handle(Handler &handler, std::array<char, BufLen> &buf, size_t offset) {
 			VstInt32 opcode;
-			offset += read_data(buf.data(), offset, opcode);
+			offset += io::read_data(buf.data(), offset, opcode);
 
 			#define OPCODE_HANDLER(MSG) case master::MSG::opcode: receive_dispatcher_message<master::MSG>(handler, buf, offset); break;
 
@@ -71,7 +87,7 @@ namespace msg {
 		template <typename Handler, size_t BufLen>
 		static void handle(Handler &handler, std::array<char, BufLen> &buf, size_t offset) {
 			VstInt32 opcode;
-			offset += read_data(buf.data(), offset, opcode);
+			offset += io::read_data(buf.data(), offset, opcode);
 
 			#define OPCODE_HANDLER(MSG) case effect::MSG::opcode: receive_dispatcher_message<effect::MSG>(handler, buf, offset); break;
 

@@ -1,0 +1,19 @@
+CXXFLAGS += \
+	-Wall \
+	-D__cdecl= \
+	-std=c++17 \
+	-Isrc
+
+LDLIBS += \
+	-lboost_unit_test_framework
+
+SOURCES = \
+	tests/common/msg/io/base.cpp \
+	tests/main.cpp
+
+.PHONY: all bin/tests
+
+all: bin/tests
+
+bin/tests:
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS) -o $@ $(addprefix src/,$(SOURCES))

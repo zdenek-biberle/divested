@@ -14,6 +14,9 @@ void print_message_info(const char *name) {
 	if constexpr (msg::has_value<Msg>)
 		std::cout << "\tvalue";
 
+	if constexpr (msg::has_payload_ptr<Msg>)
+		std::cout << "\tpayload_ptr";
+
 	if constexpr (msg::has_opt<Msg>)
 		std::cout << "\topt";
 
