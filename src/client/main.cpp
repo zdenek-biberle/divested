@@ -38,6 +38,8 @@ enum class client_state_t {
 	created
 };
 
+using array_buffer = std::array<char, 2048>;
+
 struct client_t : public handler::with_shm {
 	int send_fd;
 	int recv_fd;
@@ -49,6 +51,7 @@ struct client_t : public handler::with_shm {
 	struct message_configuration {
 		using dispatcher_received = msg::host_dispatcher;
 		using dispatcher_sent = msg::effect_dispatcher;
+		static constexpr bool is_plugin = false;
 	};
 
 	client_t(int send_fd, int recv_fd, audioMasterCallback cb, shm::shm_t &&shm):
@@ -104,7 +107,7 @@ struct client_t : public handler::with_shm {
 	void wait_for_effect() {
 		log::log() << "Waiting for AEffect (sizeof " << sizeof(AEffect) << ")" << std::endl;
 
-		std::array<char, 2048> buf;
+		array_buffer buf;
 		size_t offset = msg::receive_message(*this, buf);
 		msg::io::read_data(buf.data(), offset, effect);
 
@@ -149,7 +152,7 @@ struct client_t : public handler::with_shm {
 VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
 	auto &client = *reinterpret_cast<client_t*>(effect->user);
 	msg::dispatcher_request request{index, value, ptr, opt};
-	std::array<char, 2048> buf;
+	array_buffer buf;
 	log::log() << "aeffect_dispatcher_proc called, effect " << reinterpret_cast<void*>(effect)
 		<< ", opcode: " << opcode
 		<< ", request: " << request
@@ -176,19 +179,33 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 }
 
 void VSTCALLBACK aeffect_process_proc(AEffect* effect, float** inputs, float** outputs, VstInt32 sampleFrames) {
-	throw std::runtime_error("CLIENT: Don't yet know how to process.");
+	//throw std::runtime_error("CLIENT: Don't yet know how to process.");
 }
 
 void VSTCALLBACK aeffect_process_double_proc(AEffect* effect, double** inputs, double** outputs, VstInt32 sampleFrames) {
-	throw std::runtime_error("CLIENT: Don't yet know how to process doubles.");
+	//throw std::runtime_error("CLIENT: Don't yet know how to process doubles.");
 }
 
 void VSTCALLBACK aeffect_set_parameter_proc(AEffect* effect, VstInt32 index, float parameter) {
-	throw std::runtime_error("CLIENT: Don't yet know how to set parameters.");
+	auto &client = *reinterpret_cast<client_t*>(effect->user);
+	msg::set_parameter_request request{index, parameter};
+	array_buffer buf;
+	log::log()
+		<< "aeffect_set_parameter_proc called, effect: " << reinterpret_cast<void *>(effect)
+		<< "request: " << request
+		<< std::endl;
+	msg::send_set_parameter(client, buf, request);
 }
 
 float VSTCALLBACK aeffect_get_parameter_proc(AEffect* effect, VstInt32 index) {
-	throw std::runtime_error("CLIENT: Don't yet know how to get parameters.");
+	auto &client = *reinterpret_cast<client_t*>(effect->user);
+	msg::get_parameter_request request{index};
+	array_buffer buf;
+	log::log()
+		<< "aeffect_get_parameter_proc called, effect: " << reinterpret_cast<void *>(effect)
+		<< "request: " << request
+		<< std::endl;
+	return msg::send_get_parameter(client, buf, request);
 }
 
 extern "C" AEffect VSTCALLBACK *VSTPluginMain(audioMasterCallback audio_master) {

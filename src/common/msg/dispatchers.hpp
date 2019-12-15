@@ -27,7 +27,9 @@ namespace msg {
 			VstInt32 opcode;
 			offset += io::read_data(buf.data(), offset, opcode);
 
-			#define OPCODE_HANDLER(MSG) case master::MSG::opcode: process_message<master::MSG, host_dispatcher, dispatcher_request>(handler, buf, offset); break;
+			#define OPCODE_HANDLER(MSG) case master::MSG::opcode: \
+				process_message<master::MSG, Handler, dispatcher_request, dispatcher_response, &run<master::MSG, Handler>>(handler, buf, offset); \
+				break;
 
 			switch (opcode) {
 				MSG_MASTER_MESSAGES(OPCODE_HANDLER)
@@ -39,7 +41,7 @@ namespace msg {
 
 		template <typename Handler, size_t BufLen>
 		static VstIntPtr send(Handler &handler, std::array<char, BufLen> &buf, VstInt32 opcode, const dispatcher_request &request) {
-			#define OPCODE_HANDLER(MSG) case master::MSG::opcode: return send_message<master::MSG, dispatcher_response>(handler, buf, request).response;
+			#define OPCODE_HANDLER(MSG) case master::MSG::opcode: return send_message<master::MSG, dispatcher_response>(handler, buf, type_t::dispatcher, request).response;
 
 			switch (opcode) {
 				MSG_MASTER_MESSAGES(OPCODE_HANDLER)
@@ -64,7 +66,9 @@ namespace msg {
 			VstInt32 opcode;
 			offset += io::read_data(buf.data(), offset, opcode);
 
-			#define OPCODE_HANDLER(MSG) case effect::MSG::opcode: process_message<effect::MSG, host_dispatcher, dispatcher_request>(handler, buf, offset); break;
+			#define OPCODE_HANDLER(MSG) case effect::MSG::opcode: \
+				process_message<effect::MSG, Handler, dispatcher_request, dispatcher_response, &run<effect::MSG, Handler>>(handler, buf, offset); \
+				break;
 
 			switch (opcode) {
 				MSG_EFFECT_MESSAGES(OPCODE_HANDLER)
@@ -76,7 +80,7 @@ namespace msg {
 
 		template <typename Handler, size_t BufLen>
 		static VstIntPtr send(Handler &handler, std::array<char, BufLen> &buf, VstInt32 opcode, const dispatcher_request &request) {
-			#define OPCODE_HANDLER(MSG) case effect::MSG::opcode: return send_message<effect::MSG, dispatcher_response>(handler, buf, request).response;
+			#define OPCODE_HANDLER(MSG) case effect::MSG::opcode: return send_message<effect::MSG, dispatcher_response>(handler, buf, type_t::dispatcher, request).response;
 
 			switch (opcode) {
 				MSG_EFFECT_MESSAGES(OPCODE_HANDLER)

@@ -7,7 +7,7 @@
 
 namespace msg {
 	/// Receives a message, runs the worker to process it and sends back the result.
-	template <typename T, typename Worker, typename Request, typename Handler, size_t BufLen>
+	template <typename T, typename Handler, typename Request, typename Response, Response (*F)(Handler&, const Request&), size_t BufLen>
 	void process_message(Handler &handler, std::array<char, BufLen> &buf, size_t offset) {
 		Request request;
 		log::log() << "Receiving message " << message_name<T> << std::endl;
@@ -26,7 +26,7 @@ namespace msg {
 			T::payload::show_request(log::log() << "ptr content: ", request.ptr) << std::endl;
 
 		log::log() << "Read " << pipe.offset << " B of pipe data and " << shm.total() << " B of shm at offset " << shm_offset << std::endl;
-		auto response = Worker::template run<T>(handler, request);
+		auto response = F(handler, request);
 
 		log::log() << "Dispatcher called, result: " << response << std::endl;
 		if constexpr (has_payload_ptr<T>)

@@ -73,11 +73,33 @@ namespace msg {
 
 	struct get_parameter_request {
 		VstInt32 index;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const get_parameter_request &req) {
+			return os << "get_parameter_request{index: " << req.index << "}";
+		}
+	};
+
+	struct get_parameter_response {
+		float value;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const get_parameter_response &res) {
+			return os << "get_parameter_response{index: " << res.value << "}";
+		}
 	};
 
 	struct set_parameter_request {
 		VstInt32 index;
 		float opt;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const set_parameter_request &req) {
+			return os << "set_parameter_request{index: " << req.index << ", opt: " << req.opt << "}";
+		}
+	};
+
+	struct set_parameter_response {
+		inline friend std::ostream &operator<<(std::ostream &os, const set_parameter_response &req) {
+			return os << "set_parameter_response{}";
+		}
 	};
 }
 

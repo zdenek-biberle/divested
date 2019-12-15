@@ -2,6 +2,7 @@
 #define MSG_MESSAGE_NAME_HPP
 
 #include "common/msg/effect/messages.hpp"
+#include "common/msg/general/messages.hpp"
 #include "common/msg/master/messages.hpp"
 
 namespace msg {
@@ -18,6 +19,12 @@ namespace msg {
 		template <> \
 		constexpr const char *message_name<master::MSG> = #MSG;
 	MSG_MASTER_MESSAGES(MASTER_MESSAGE_TO_NAME)
+	#undef MASTER_MESSAGE_TO_NAME
+
+	#define GENERAL_MESSAGE_TO_NAME(MSG) \
+		template <> \
+		constexpr const char *message_name<general::MSG> = #MSG;
+	MSG_GENERAL_MESSAGES(GENERAL_MESSAGE_TO_NAME)
 	#undef MASTER_MESSAGE_TO_NAME
 }
 

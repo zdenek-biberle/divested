@@ -45,7 +45,7 @@ namespace msg {
 	}
 
 	template <typename Msg, typename Response, typename Handler, size_t BufLen, typename Body>
-	Response send_message(Handler &handler, std::array<char, BufLen> &buf, const Body &body) {
+	Response send_message(Handler &handler, std::array<char, BufLen> &buf, type_t type, const Body &body) {
 		log::log() << "Sending dispatcher call for message " << message_name<Msg> << std::endl;
 		log::log() << body << std::endl;
 
@@ -55,7 +55,7 @@ namespace msg {
 		io::buf req_shm{handler.shm(), shm_offset};
 		payload_ctx req_ctx{req_pipe, req_shm, handler};
 
-		req_pipe.write_data(type_t::dispatcher);
+		req_pipe.write_data(type);
 		io::write_request<Msg>(req_ctx, body);
 
 		handler.shm_push(req_shm.total());
@@ -81,6 +81,16 @@ namespace msg {
 	template <typename Handler, size_t BufLen>
 	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 opcode, const dispatcher_request &request) {
 		return Handler::message_configuration::dispatcher_sent::send(handler, buf, opcode, request);
+	}
+
+	template <typename Handler, size_t BufLen>
+	float send_get_parameter(Handler &handler, std::array<char, BufLen> &buf, const get_parameter_request &request) {
+		return send_message<general::get_parameter, get_parameter_response>(handler, buf, type_t::get_parameter, request).value;
+	}
+
+	template <typename Handler, size_t BufLen>
+	void send_set_parameter(Handler &handler, std::array<char, BufLen> &buf, const set_parameter_request &request) {
+		send_message<general::set_parameter, set_parameter_response>(handler, buf, type_t::set_parameter, request);
 	}
 }
 

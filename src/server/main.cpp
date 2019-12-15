@@ -36,6 +36,7 @@ struct server_t : public handler::with_shm {
 	struct message_configuration {
 		using dispatcher_received = msg::effect_dispatcher;
 		using dispatcher_sent = msg::host_dispatcher;
+		static constexpr bool is_plugin = true;
 	};
 
 	server_t(int send_fd, int recv_fd, shm::shm_t &&shm):
@@ -58,6 +59,14 @@ struct server_t : public handler::with_shm {
 
 	VstIntPtr dispatcher(VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
 		return effect->dispatcher(effect, opcode, index, value, ptr, opt);
+	}
+
+	float get_parameter(VstInt32 index) {
+		return effect->getParameter(effect, index);
+	}
+
+	void set_parameter(VstInt32 index, float opt) {
+		effect->setParameter(effect, index, opt);
 	}
 
 	template<size_t BufLen>
