@@ -1,6 +1,7 @@
 CXXFLAGS += \
 	-Wall \
 	-D__cdecl= \
+	-DVST_FORCE_DEPRECATED=0 \
 	-std=c++17 \
 	-Isrc
 

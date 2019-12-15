@@ -109,7 +109,7 @@ struct client_t : public handler::with_shm {
 
 		log_proc_addresses(&effect);
 		effect.dispatcher = &aeffect_dispatcher_proc;
-		effect.DECLARE_VST_DEPRECATED(process) = &aeffect_process_proc;
+		effect.process = &aeffect_process_proc;
 		effect.setParameter = &aeffect_set_parameter_proc;
 		effect.getParameter = &aeffect_get_parameter_proc;
 		effect.processReplacing = &aeffect_process_proc;
@@ -126,7 +126,7 @@ struct client_t : public handler::with_shm {
 			<< "    object: " << eff->object << std::endl
 			<< "    user: " << eff->user << std::endl
 			<< "    dispatcher: " << reinterpret_cast<void*>(eff->dispatcher) << std::endl
-			<< "    process: " << reinterpret_cast<void*>(eff->DECLARE_VST_DEPRECATED(process)) << std::endl
+			<< "    process: " << reinterpret_cast<void*>(eff->process) << std::endl
 			<< "    setParameter: " << reinterpret_cast<void*>(eff->setParameter) << std::endl
 			<< "    getParameter: " << reinterpret_cast<void*>(eff->getParameter) << std::endl
 			<< "    processReplacing: " << reinterpret_cast<void*>(eff->processReplacing) << std::endl

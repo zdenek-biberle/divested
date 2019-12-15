@@ -12,10 +12,11 @@ EXE = divested-server
 override CXXFLAGS += \
 	-Wall \
 	-DUNICODE \
+	-D_UNICODE \
+	-DVST_FORCE_DEPRECATED=0 \
+	-DNONAMELESSUNION \
 	-mwindows \
 	-fno-short-wchar \
-	-D_UNICODE \
-	-DNONAMELESSUNION \
 	-std=c++17 \
 	-ggdb
 

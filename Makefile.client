@@ -12,6 +12,7 @@ EXE = divested-client.so
 override CXXFLAGS += \
 	-Wall \
 	-D__cdecl= \
+	-DVST_FORCE_DEPRECATED=0 \
 	-std=c++17 \
 	-fPIC \
 	-ggdb
