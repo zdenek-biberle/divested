@@ -19,10 +19,19 @@
 	F(setSampleRate) \
 	F(setBlockSize) \
 	F(mainsChanged) \
-	/* F(getRect) */ \
+	/* F(editGetRect) */ \
 	/* F(editOpen) */ \
 	F(editClose) \
+	/* F(editDraw) */ \
+	/* F(editMouse) */ \
+	/* F(editKey) */ \
 	F(editIdle) \
+	/* F(editTop) */ \
+	/* F(editSleep) */ \
+	/* F(identify) */ \
+	F(getChunk) \
+	/* F(setChunk) */ \
+	/* F(processEvents) */ \
 	F(canBeAutomated) \
 	/* F(string2Parameter) */ \
 	/* F(getNumProgramCategories) */ \
@@ -49,7 +58,7 @@
 	F(getVendorVersion) \
 	F(canDo) \
 	F(getTailSize) \
-	/* F(idle) */ \
+	F(idle) \
 	/* F(getIcon) */ \
 	/* F(setViewPosition) */ \
 	/* F(getParameterProperties) */ \
@@ -91,7 +100,7 @@ namespace msg::effect {
 	struct setSampleRate : public msg<effSetSampleRate>, opt {};
 	struct setBlockSize : public msg<effSetBlockSize>, value {};
 	struct mainsChanged : public msg<effMainsChanged>, value {};
-	// struct getRect : public msg<effGetRect> {};
+	// struct editGetRect : public msg<effGetRect> {};
 	// struct editOpen : public msg<effEditOpen> {};
 	struct editClose : public msg<effEditClose> {};
 	// struct editDraw : public msg<effEditDraw> {};
@@ -101,7 +110,7 @@ namespace msg::effect {
 	// struct editTop : public msg<effEditTop> {};
 	// struct editSleep : public msg<effEditSleep> {};
 	// struct identify : public msg<effIdentify> {};
-	// struct getChunk : public msg<effGetChunk> {};
+	struct getChunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char*, chunk_out>>, plain_ret {};
 	// struct setChunk : public msg<effSetChunk> {};
 	// struct processEvents : public msg<effProcessEvents> {};
 	struct canBeAutomated : public msg<effCanBeAutomated>, index, plain_ret {};
@@ -130,7 +139,7 @@ namespace msg::effect {
 	struct getVendorVersion : public msg<effGetVendorVersion>, plain_ret {};
 	struct canDo : public msg<effCanDo>, str_in_ptr {};
 	struct getTailSize : public msg<effGetTailSize>, plain_ret {};
-	// struct idle : public msg<effIdle> {};
+	struct idle : public msg<effIdle>, plain_ret {};
 	// struct getIcon : public msg<effGetIcon> {};
 	// struct setViewPosition : public msg<effSetViewPosition> {};
 	// struct getParameterProperties : public msg<effGetParameterProperties> {};

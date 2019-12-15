@@ -3,11 +3,13 @@
 #include <fcntl.h>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <type_traits>
 #include <unistd.h>
+#include <vector>
 #include "pluginterfaces/vst2.x/aeffect.h"
 #include "common/handler/shm.hpp"
 #include "common/msg/io/base.hpp"
@@ -42,6 +44,7 @@ struct client_t : public handler::with_shm {
 	AEffect effect;
 	audioMasterCallback cb;
 	client_state_t state;
+	std::vector<std::unique_ptr<char[]>> allocated_chunks;
 
 	struct message_configuration {
 		using dispatcher_received = msg::host_dispatcher;
@@ -134,6 +137,13 @@ struct client_t : public handler::with_shm {
 		;
 		
 	}
+
+	char *allocate_chunk(size_t size) {
+		auto chunk = std::make_unique<char[]>(size);
+		auto ptr = chunk.get();
+		allocated_chunks.push_back(std::move(chunk));
+		return ptr;
+	}
 };
 
 VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
@@ -148,6 +158,12 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 		<< std::endl;
 	auto result = msg::send_dispatcher(client, buf, opcode, index, value, ptr, opt);
 	log::log() << "aeffect_dispatcher_proc finished with result " << result << std::endl;
+
+	// If we got an effMainsChanged message, we can clean up allocated chunks.
+	if (opcode == effMainsChanged) {
+		log::log() << "Cleaning up " << client.allocated_chunks.size() << " allocated chunks" << std::endl;
+		client.allocated_chunks.clear();
+	}
 
 	// If we got an effClose message, we should send a return to the server so that
 	// it finishes. We should also cleanup after ourselves.

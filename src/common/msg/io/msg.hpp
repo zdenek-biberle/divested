@@ -2,52 +2,52 @@
 #define MSG_IO_MSG_HPP
 
 namespace msg::io {
-	template <typename T, typename Pipe, typename Shm>
-	void write_request(Pipe &pipe, Shm &shm, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
+	template <typename T, typename Ctx>
+	void write_request(const Ctx &ctx, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
 		if constexpr (has_index<T>)
-			pipe.write_data(index);
+			ctx.pipe.write_data(index);
 
 		if constexpr (has_value<T>)
-			pipe.write_data(value);
+			ctx.pipe.write_data(value);
 
 		if constexpr (has_payload_ptr<T>)
-			T::payload::write_request(pipe, shm, ptr);
+			T::payload::write_request(ctx, ptr);
 
 		if constexpr (has_opt<T>)
-			pipe.write_data(opt);
+			ctx.pipe.write_data(opt);
 	}
 
-	template <typename T, typename Pipe, typename Shm>
-	void read_request(Pipe &pipe, Shm &shm, VstInt32 &index, VstIntPtr &value, void *&ptr, float &opt) {
+	template <typename T, typename Ctx>
+	void read_request(const Ctx &ctx, VstInt32 &index, VstIntPtr &value, void *&ptr, float &opt) {
 		if constexpr (has_index<T>)
-			pipe.read_data(index);
+			ctx.pipe.read_data(index);
 
 		if constexpr (has_value<T>)
-			pipe.read_data(value);
+			ctx.pipe.read_data(value);
 
 		if constexpr (has_payload_ptr<T>)
-			T::payload::read_request(pipe, shm, ptr);
+			T::payload::read_request(ctx, ptr);
 
 		if constexpr (has_opt<T>)
-			pipe.read_data(opt);
+			ctx.pipe.read_data(opt);
 	}
 
-	template <typename T, typename Pipe, typename Shm>
-	void write_response(Pipe &pipe, Shm &shm, void *ptr, VstIntPtr response) {
-		if constexpr (has_payload_ptr<T>)
-			T::payload::write_response(pipe, shm, ptr);
-
+	template <typename T, typename Ctx>
+	void write_response(const Ctx &ctx, void *ptr, VstIntPtr response) {
 		if constexpr (has_plain_ret<T>)
-			pipe.write_data(response);
+			ctx.pipe.write_data(response);
+
+		if constexpr (has_payload_ptr<T>)
+			T::payload::write_response(ctx, ptr, response);
 	}
 
-	template <typename T, typename Pipe, typename Shm>
-	void read_response(Pipe &pipe, Shm &shm, void *ptr, VstIntPtr &response) {
-		if constexpr (has_payload_ptr<T>)
-			T::payload::read_response(pipe, shm, ptr);
-
+	template <typename T, typename Ctx>
+	void read_response(const Ctx &ctx, void *ptr, VstIntPtr &response) {
 		if constexpr (has_plain_ret<T>)
-			pipe.read_data(response);
+			ctx.pipe.read_data(response);
+
+		if constexpr (has_payload_ptr<T>)
+			T::payload::read_response(ctx, ptr, response);
 	}
 }
 

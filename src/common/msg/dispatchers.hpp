@@ -22,8 +22,9 @@ namespace msg {
 
 		io::buf pipe{buf.data(), offset};
 		io::buf shm{handler.shm(), shm_offset};
+		auto req_ctx = mk_payload_ctx(pipe, shm, handler);
 		
-		io::read_request<T>(pipe, shm, index, value, ptr, opt);
+		io::read_request<T>(req_ctx, index, value, ptr, opt);
 		handler.shm_push(shm.total());
 
 		log::log() << "Read dispatcher request, index: " << index << ", value: " << value << ", ptr: " << ptr << ", opt: " << opt << std::endl;
@@ -36,7 +37,7 @@ namespace msg {
 
 		log::log() << "Dispatcher called, result: " << response << std::endl;
 		if constexpr (has_payload_ptr<T>)
-			T::payload::show_response(log::log() << "ptr content: ", ptr) << std::endl;
+			T::payload::show_response(log::log() << "ptr content: ", ptr, response) << std::endl;
 
 		// TODO: cleanup response data
 		send_return_dispatcher<T>(handler, buf, shm_offset, shm.total(), ptr, response);
