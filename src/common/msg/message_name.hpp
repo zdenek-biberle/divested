@@ -1,3 +1,6 @@
+#ifndef MSG_MESSAGE_NAME_HPP
+#define MSG_MESSAGE_NAME_HPP
+
 #include "common/msg/effect/messages.hpp"
 #include "common/msg/master/messages.hpp"
 
@@ -17,3 +20,5 @@ namespace msg {
 	MSG_MASTER_MESSAGES(MASTER_MESSAGE_TO_NAME)
 	#undef MASTER_MESSAGE_TO_NAME
 }
+
+#endif

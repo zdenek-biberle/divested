@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-#include "common/log/log.hpp"
+#include "common/msg/type.hpp"
 #include "pluginterfaces/vst2.x/aeffect.h"
 
 namespace msg {
@@ -31,13 +31,13 @@ namespace msg {
 			Sub::read_request(ctx, *reinterpret_cast<T **>(&ptr));
 		}
 
-		template <typename Ctx>
-		static void write_response(const Ctx &ctx, void *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void write_response(const Ctx &ctx, void *ptr, const Response &response) {
 			Sub::write_response(ctx, reinterpret_cast<T *>(ptr), response);
 		}
 
-		template <typename Ctx>
-		static void read_response(const Ctx &ctx, void *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void read_response(const Ctx &ctx, void *ptr, const Response &response) {
 			Sub::read_response(ctx, reinterpret_cast<T *>(ptr), response);
 		}
 
@@ -45,7 +45,8 @@ namespace msg {
 			return Sub::show_request(os, reinterpret_cast<T *>(ptr));
 		}
 
-		static inline std::ostream &show_response(std::ostream &os, void *ptr, VstIntPtr response) {
+		template <typename Response>
+		static std::ostream &show_response(std::ostream &os, void *ptr, const Response &response) {
 			return Sub::show_response(os, reinterpret_cast<T *>(ptr), response);
 		}
 	};
@@ -68,13 +69,13 @@ namespace msg {
 			ctx.shm.map_data_array(ptr, len);
 		}
 
-		template <typename Ctx>
-		static void write_response(const Ctx &ctx, char *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void write_response(const Ctx &ctx, char *ptr, const Response &response) {
 			ctx.shm.template skip_data_array<char>(::strlen(ptr));
 		}
 
-		template <typename Ctx>
-		static void read_response(const Ctx &ctx, char *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void read_response(const Ctx &ctx, char *ptr, const Response &response) {
 			ctx.shm.template skip_data_array<char>(::strlen(ptr));
 		}
 
@@ -82,7 +83,8 @@ namespace msg {
 			return os << "\"" << ptr << "\"";
 		}
 
-		static inline std::ostream &show_response(std::ostream &os, char *ptr, VstIntPtr response) {
+		template <typename Response>
+		static std::ostream &show_response(std::ostream &os, char *ptr, const Response &response) {
 			return os << "N/A";
 		}
 	};
@@ -102,13 +104,13 @@ namespace msg {
 			ctx.shm.map_data_array(ptr, Size);
 		}
 
-		template <typename Ctx>
-		static void write_response(const Ctx &ctx, T *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void write_response(const Ctx &ctx, T *ptr, const Response &response) {
 			ctx.shm.template skip_data_array<T>(Size);
 		}
 
-		template <typename Ctx>
-		static void read_response(const Ctx &ctx, T *ptr, VstIntPtr response) {
+		template <typename Ctx, typename Response>
+		static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
 			ctx.shm.read_data_array(ptr, Size);
 		}
 
@@ -116,7 +118,8 @@ namespace msg {
 			return os << "N/A";
 		}
 
-		static inline std::ostream &show_response(std::ostream &os, T *ptr, VstIntPtr response) {
+		template <typename Response>
+		static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
 			return Show::show(os, ptr);
 		}
 	};
@@ -140,7 +143,6 @@ namespace msg {
 			// ignore the value of ptr, just write a single nullptr to the
 			// shared memory
 			ctx.shm.template write_data<char *>(nullptr);
-			log::log() << "chunk_out wrote " << ctx.shm.total() << " B of shm" << std::endl;
 		}
 
 		template <typename Ctx>
@@ -148,23 +150,22 @@ namespace msg {
 			// map ptr so that it points to the pointer in shm, the plugin
 			// will then fill in that pointer
 			ctx.shm.map_data_array(ptr, 1);
-			log::log() << "chunk_out mapped " << ctx.shm.total() << " B of shm" << std::endl;
 		}
 
 		template <typename Ctx>
-		static void write_response(const Ctx &ctx, char **ptr, VstIntPtr size) {
+		static void write_response(const Ctx &ctx, char **ptr, const dispatcher_response &response) {
 			// ptr now points to the pointer to the data array and response contains
 			// the length, so we just write that to shm
+			auto size = response.response;
 			ctx.shm.write_data_array(*ptr, size);
-			log::log() << "chunk_out wrote " << ctx.shm.total() << " B of response to shm (expected " << size << ") B" << std::endl;
 		}
 
 		template <typename Ctx>
-		static void read_response(const Ctx &ctx, char **ptr, VstIntPtr size) {
+		static void read_response(const Ctx &ctx, char **ptr, const dispatcher_response &response) {
 			// now, allocate a chunk of memory and copy what's in shm to it
+			auto size = response.response;
 			char *chunk = ctx.allocator.allocate_chunk(size);
 			ctx.shm.read_data_array(chunk, size);
-			log::log() << "chunk_out read " << ctx.shm.total() << " B of response from shm (expected " << size << ") B" << std::endl;
 
 			// and now point the pointer that ptr points to to it
 			ptr = &chunk;
@@ -174,8 +175,8 @@ namespace msg {
 			return os << "N/A";
 		}
 
-		static inline std::ostream &show_response(std::ostream &os, char **ptr, VstIntPtr size) {
-			return os << "chunk(" << size << ")";
+		static inline std::ostream &show_response(std::ostream &os, char **ptr, const dispatcher_response &response) {
+			return os << "chunk(" << response.response << ")";
 		}
 	
 	};

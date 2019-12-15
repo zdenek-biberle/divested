@@ -4,6 +4,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "pluginterfaces/vst2.x/aeffect.h"
+
 #define MSG_TYPES(F) \
 	F(return_) \
 	F(dispatcher) \
@@ -49,6 +51,34 @@ namespace msg {
 			}
 		}
 	}
+
+	struct dispatcher_request {
+		VstInt32 index = 0;
+		VstIntPtr value = 0;
+		void *ptr = nullptr;
+		float opt = 0.f;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const dispatcher_request &req) {
+			return os << "dispatcher_request{index: " << req.index << ", value: " << req.value << ", ptr: " << req.ptr << ", opt: " << req.opt << "}";
+		}
+	};
+
+	struct dispatcher_response {
+		VstIntPtr response = 0;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const dispatcher_response &res) {
+			return os << "dispatcher_response{response: " << res.response << "}";
+		}
+	};
+
+	struct get_parameter_request {
+		VstInt32 index;
+	};
+
+	struct set_parameter_request {
+		VstInt32 index;
+		float opt;
+	};
 }
 
 #endif

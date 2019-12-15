@@ -101,10 +101,14 @@ struct globals_t {
 globals_t globals;
 
 VstIntPtr VSTCALLBACK audio_master(AEffect *effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
-	printf("SERVER: master: effect %p, opcode %d, index %d, value %ld, ptr %p, opt %f\n", effect, opcode, index, value, ptr, opt);
+	msg::dispatcher_request request{index, value, ptr, opt};
+	log::log()
+		<< "master: effect: " << reinterpret_cast<void *>(effect)
+		<< "opcode: " << opcode
+		<< "request: " << request
+		<< std::endl;
 	std::array<char, 2048> buf;
-
-	return msg::send_dispatcher(*globals.server, buf, opcode, index, value, ptr, opt);
+	return msg::send_dispatcher(*globals.server, buf, opcode, request);
 }
 
 std::string wstr_conv(const WCHAR *str) {

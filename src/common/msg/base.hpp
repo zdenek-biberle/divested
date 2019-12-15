@@ -5,10 +5,14 @@
 #include "pluginterfaces/vst2.x/aeffect.h"
 
 namespace msg {
+	struct opcode_tag {};
+
 	template <VstInt32 op>
-	struct msg {
+	struct msg : public opcode_tag {
 		static constexpr VstInt32 opcode = op;
 	};
+
+	template <typename T> constexpr bool has_opcode = std::is_base_of_v<opcode_tag, T>;
 
 	struct index {};
 	template <typename T> constexpr bool has_index = std::is_base_of_v<index, T>;

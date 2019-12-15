@@ -148,15 +148,13 @@ struct client_t : public handler::with_shm {
 
 VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
 	auto &client = *reinterpret_cast<client_t*>(effect->user);
+	msg::dispatcher_request request{index, value, ptr, opt};
 	std::array<char, 2048> buf;
 	log::log() << "aeffect_dispatcher_proc called, effect " << reinterpret_cast<void*>(effect)
-		<< ", opcode " << opcode
-		<< ", index " << index
-		<< ", value " << value
-		<< ", ptr " << ptr
-		<< ", opt " << opt
+		<< ", opcode: " << opcode
+		<< ", request: " << request
 		<< std::endl;
-	auto result = msg::send_dispatcher(client, buf, opcode, index, value, ptr, opt);
+	auto result = msg::send_dispatcher(client, buf, opcode, request);
 	log::log() << "aeffect_dispatcher_proc finished with result " << result << std::endl;
 
 	// If we got an effMainsChanged message, we can clean up allocated chunks.

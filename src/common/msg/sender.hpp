@@ -26,8 +26,8 @@ namespace msg {
 		handler.message_write(buf.data(), offset);
 	}
 
-	template <typename Msg, typename Handler, size_t BufLen>
-	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, size_t shm_size, void *ptr, VstIntPtr response) {
+	template <typename Msg, typename Response, typename Request, typename Handler, size_t BufLen>
+	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, size_t shm_size, const Request &request, const Response &response) {
 		log::log() << "Sending return for dispatcher message " << message_name<Msg> << std::endl;
 
 		io::buf pipe{buf.data(), 0};
@@ -35,7 +35,7 @@ namespace msg {
 		auto resp_ctx = mk_payload_ctx(pipe, shm, handler);
 
 		pipe.write_data(type_t::return_);
-		io::write_response<Msg>(resp_ctx, ptr, response);
+		io::write_response<Msg>(resp_ctx, request, response);
 
 		if (shm.total() || shm.total() != shm_size)
 			log::log() << "write_response wrote " << shm.total() << " B of shm (compared to " << shm_size << " B)" << std::endl;
@@ -44,10 +44,10 @@ namespace msg {
 		handler.message_write(buf.data(), pipe.total());	
 	}
 
-	template <typename Msg, typename Handler, size_t BufLen>
-	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
+	template <typename Msg, typename Response, typename Handler, size_t BufLen, typename Body>
+	Response send_message(Handler &handler, std::array<char, BufLen> &buf, const Body &body) {
 		log::log() << "Sending dispatcher call for message " << message_name<Msg> << std::endl;
-		log::log() << "index: " << index << ", value: " << value << ", ptr: " << ptr << ", opt: " << opt << std::endl;
+		log::log() << body << std::endl;
 
 		size_t shm_offset = handler.shm_offset();
 
@@ -56,8 +56,7 @@ namespace msg {
 		auto req_ctx = mk_payload_ctx(req_pipe, req_shm, handler);
 
 		req_pipe.write_data(type_t::dispatcher);
-		req_pipe.write_data(Msg::opcode);
-		io::write_request<Msg>(req_ctx, index, value, ptr, opt);
+		io::write_request<Msg>(req_ctx, body);
 
 		handler.shm_push(req_shm.total());
 		handler.message_write(buf.data(), req_pipe.total());
@@ -68,8 +67,8 @@ namespace msg {
 		io::buf resp_shm{handler.shm(), shm_offset};
 		auto resp_ctx = mk_payload_ctx(resp_pipe, resp_shm, handler);
 
-		VstIntPtr response = 0;
-		io::read_response<Msg>(resp_ctx, ptr, response);
+		Response response;
+		io::read_response<Msg>(resp_ctx, body, response);
 
 		if (req_shm.total() != resp_shm.total())
 			log::log() << "Written shm size (" << req_shm.total() << " B) does not equal read shm size (" << resp_shm.total() << " B)" << std::endl;
@@ -80,8 +79,8 @@ namespace msg {
 	}
 
 	template <typename Handler, size_t BufLen>
-	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 opcode, VstInt32 index, VstIntPtr value, void *ptr, float opt) {
-		return Handler::message_configuration::dispatcher_sent::send(handler, buf, opcode, index, value, ptr, opt);
+	VstIntPtr send_dispatcher(Handler &handler, std::array<char, BufLen> &buf, VstInt32 opcode, const dispatcher_request &request) {
+		return Handler::message_configuration::dispatcher_sent::send(handler, buf, opcode, request);
 	}
 }
 
