@@ -123,6 +123,7 @@ struct client_t : public handler::with_shm {
 		effect.processDoubleReplacing = &aeffect_process_double_proc;
 		effect.user = reinterpret_cast<void*>(this);
 		effect.object = nullptr; // TODO: try setting this to a not null value when everything else works to see if the DAW breaks
+		effect.flags &= ~effFlagsHasEditor;
 		log_proc_addresses(&effect);
 
 		state = client_state_t::created;
