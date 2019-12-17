@@ -57,6 +57,7 @@
 	F(getVendorString) \
 	F(getProductString) \
 	F(getVendorVersion) \
+	/* F(vendorSpecific) */ \
 	F(canDo) \
 	F(getTailSize) \
 	F(idle) \
@@ -138,6 +139,7 @@ namespace msg::effect {
 	struct getVendorString : public msg<effGetVendorString>, str_out_ptr<kVstMaxVendorStrLen> {};
 	struct getProductString : public msg<effGetProductString>, str_out_ptr<kVstMaxProductStrLen> {};
 	struct getVendorVersion : public msg<effGetVendorVersion>, plain_ret {};
+	// struct vendorSpecific : public msg<effVendorSpecific> {};
 	struct canDo : public msg<effCanDo>, str_in_ptr {};
 	struct getTailSize : public msg<effGetTailSize>, plain_ret {};
 	struct idle : public msg<effIdle>, plain_ret {};

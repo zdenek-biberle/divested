@@ -155,6 +155,11 @@ struct client_t : public handler::with_shm {
 };
 
 VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
+	// ignore vendor specific calls (for now)
+	if (opcode == effVendorSpecific) {
+		return 0;
+	}
+
 	auto &client = *reinterpret_cast<client_t*>(effect->user);
 	msg::dispatcher_request request{index, value, ptr, opt};
 	array_buffer buf;
