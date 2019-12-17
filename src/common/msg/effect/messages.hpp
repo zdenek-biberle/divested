@@ -140,7 +140,7 @@ namespace msg::effect {
 	struct get_product_string : public msg<effGetProductString>, str_out_ptr<kVstMaxProductStrLen> {};
 	struct get_vendor_version : public msg<effGetVendorVersion>, plain_ret {};
 	// struct vendor_specific : public msg<effVendorSpecific> {};
-	struct can_do : public msg<effCanDo>, str_in_ptr {};
+	struct can_do : public msg<effCanDo>, str_in_ptr, plain_ret {};
 	struct get_tail_size : public msg<effGetTailSize>, plain_ret {};
 	struct idle : public msg<effIdle>, plain_ret {};
 	// struct get_icon : public msg<effGetIcon> {};
