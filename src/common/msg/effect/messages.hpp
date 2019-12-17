@@ -2,6 +2,7 @@
 #define MSG_EFFECT_MESSAGES_HPP
 
 #include "common/msg/base.hpp"
+#include "common/vst/ostream.hpp"
 #include "pluginterfaces/vst2.x/aeffect.h"
 #include "pluginterfaces/vst2.x/aeffectx.h"
 
@@ -61,7 +62,7 @@
 	F(idle) \
 	/* F(getIcon) */ \
 	/* F(setViewPosition) */ \
-	/* F(getParameterProperties) */ \
+	F(getParameterProperties) \
 	/* F(keysRequired) */ \
 	F(getVstVersion) \
 	F(editKeyDown) \
@@ -142,7 +143,7 @@ namespace msg::effect {
 	struct idle : public msg<effIdle>, plain_ret {};
 	// struct getIcon : public msg<effGetIcon> {};
 	// struct setViewPosition : public msg<effSetViewPosition> {};
-	// struct getParameterProperties : public msg<effGetParameterProperties> {};
+	struct getParameterProperties : public msg<effGetParameterProperties>, index, payload_ptr<casted_ptr<VstParameterProperties, out_single<VstParameterProperties>>>, plain_ret {};
 	// struct keysRequired : public msg<effKeysRequired> {};
 	struct getVstVersion : public msg<effGetVstVersion>, plain_ret {};
 	struct editKeyDown : public msg<effEditKeyDown>, index, value, opt, plain_ret {};

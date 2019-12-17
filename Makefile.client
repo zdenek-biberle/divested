@@ -5,7 +5,8 @@ EXE_DIR = bin
 SOURCES = \
 	client/main \
 	common/shm/shm \
-	common/util/random_string
+	common/util/random_string \
+	common/vst/ostream
 
 EXE = divested-client.so
 

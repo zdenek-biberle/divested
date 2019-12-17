@@ -87,6 +87,21 @@ namespace msg {
 		}
 	};
 
+	/// Shows the contents of out_array as a string.
+	struct out_array_show_str {
+		static inline std::ostream &show(std::ostream &os, char *ptr) {
+			return os << "\"" << ptr << "\"";
+		}
+	};
+
+	/// Shows the contents of out_single directly.
+	template <typename T>
+	struct out_single_direct {
+		static std::ostream &show(std::ostream &os, T *ptr) {
+			return os << *ptr;
+		}
+	};
+
 	/// An array of items that serves as an output from the dispatcher. It is
 	/// allocated within shm, filled within the dispatcher and then copied
 	/// to its expected location.
@@ -122,12 +137,10 @@ namespace msg {
 		}
 	};
 
-	/// Shows the contens of out_array as a string.
-	struct out_array_show_str {
-		static inline std::ostream &show(std::ostream &os, char *ptr) {
-			return os << "\"" << ptr << "\"";
-		}
-	};
+	template <typename T>
+	struct out_single : public out_array<T, 1, out_single_direct<T>>
+	{};
+
 
 	/// This is the output of getChunk. A pointer is allocated within the shm,
 	/// a pointer to this pointer is passed to the plugin and that plugin then
