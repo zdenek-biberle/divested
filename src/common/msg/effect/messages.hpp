@@ -53,7 +53,7 @@
 	/* F(setBlockSizeAndSampleRate) */ \
 	F(setBypass) \
 	F(getEffectName) \
-	/* F(getErrorText) */ \
+	F(getErrorText) \
 	F(getVendorString) \
 	F(getProductString) \
 	F(getVendorVersion) \
@@ -134,7 +134,7 @@ namespace msg::effect {
 	// struct setBlockSizeAndSampleRate : public msg<effSetBlockSizeAndSampleRate> {};
 	struct setBypass : public msg<effSetBypass>, value {};
 	struct getEffectName : public msg<effGetEffectName>, str_out_ptr<kVstMaxEffectNameLen> {};
-	// struct getErrorText : public msg<effGetErrorText> {};
+	struct getErrorText : public msg<effGetErrorText>, str_out_ptr<256> {}; // 256 chars seems about right
 	struct getVendorString : public msg<effGetVendorString>, str_out_ptr<kVstMaxVendorStrLen> {};
 	struct getProductString : public msg<effGetProductString>, str_out_ptr<kVstMaxProductStrLen> {};
 	struct getVendorVersion : public msg<effGetVendorVersion>, plain_ret {};

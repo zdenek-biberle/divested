@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "common/msg/type.hpp"
+#include "common/util/str_writer.hpp"
 #include "pluginterfaces/vst2.x/aeffect.h"
 
 namespace msg {
@@ -89,15 +90,15 @@ namespace msg {
 
 	/// Shows the contents of out_array as a string.
 	struct out_array_show_str {
-		static inline std::ostream &show(std::ostream &os, char *ptr) {
-			return os << "\"" << ptr << "\"";
+		static inline std::ostream &show(std::ostream &os, char *ptr, size_t size) {
+			return os << util::str_writer{ptr, size};
 		}
 	};
 
 	/// Shows the contents of out_single directly.
 	template <typename T>
 	struct out_single_direct {
-		static std::ostream &show(std::ostream &os, T *ptr) {
+		static std::ostream &show(std::ostream &os, T *ptr, size_t size) {
 			return os << *ptr;
 		}
 	};
@@ -133,7 +134,7 @@ namespace msg {
 
 		template <typename Response>
 		static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
-			return Show::show(os, ptr);
+			return Show::show(os, ptr, Size);
 		}
 	};
 

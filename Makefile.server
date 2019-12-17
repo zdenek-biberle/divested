@@ -6,6 +6,7 @@ SOURCES = \
 	server/main \
 	common/shm/shm \
 	common/util/random_string \
+	common/util/str_writer \
 	common/vst/ostream
 
 EXE = divested-server
