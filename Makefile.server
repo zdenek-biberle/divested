@@ -3,7 +3,12 @@ OBJECTS_DIR = obj
 EXE_DIR = bin
 
 SOURCES = \
+	server/globals_t \
+	server/log \
 	server/main \
+	server/server_t \
+	server/shared_t \
+	common/msg/type \
 	common/path/build_for_handler \
 	common/shm/shm \
 	common/util/random_string \

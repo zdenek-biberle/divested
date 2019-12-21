@@ -11,19 +11,19 @@ namespace msg {
 
 	#define EFFECT_MESSAGE_TO_NAME(MSG) \
 		template <> \
-		constexpr const char *message_name<effect::MSG> = #MSG;
+		inline constexpr const char *message_name<effect::MSG> = #MSG;
 	MSG_EFFECT_MESSAGES(EFFECT_MESSAGE_TO_NAME)
 	#undef EFFECT_MESSAGE_TO_NAME
 
 	#define MASTER_MESSAGE_TO_NAME(MSG) \
 		template <> \
-		constexpr const char *message_name<master::MSG> = #MSG;
+		inline constexpr const char *message_name<master::MSG> = #MSG;
 	MSG_MASTER_MESSAGES(MASTER_MESSAGE_TO_NAME)
 	#undef MASTER_MESSAGE_TO_NAME
 
 	#define GENERAL_MESSAGE_TO_NAME(MSG) \
 		template <> \
-		constexpr const char *message_name<general::MSG> = #MSG;
+		inline constexpr const char *message_name<general::MSG> = #MSG;
 	MSG_GENERAL_MESSAGES(GENERAL_MESSAGE_TO_NAME)
 	#undef MASTER_MESSAGE_TO_NAME
 }

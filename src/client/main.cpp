@@ -113,10 +113,9 @@ struct client_t : public handler::with_shm {
 		return result;
 	}
 
-	template<size_t BufLen>
-	ssize_t message_read(std::array<char, BufLen> &buf) {
-		LOG_TRACE("Reading " << buf.size() << " B...");
-		ssize_t readlen = ::read(recv_fd, buf.data(), buf.size());
+	ssize_t message_read(char *buf, size_t len) {
+		LOG_TRACE("Reading " << len << " B...");
+		ssize_t readlen = ::read(recv_fd, buf, len);
 		LOG_TRACE("Read " << readlen << " B");
 
 		if (readlen == 0)

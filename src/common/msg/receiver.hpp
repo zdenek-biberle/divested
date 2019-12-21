@@ -89,7 +89,7 @@ namespace msg {
 
 	template <typename Handler, size_t BufLen>
 	size_t receive_message(Handler &handler, std::array<char, BufLen> &buf) {
-		ssize_t readlen = handler.message_read(buf);
+		ssize_t readlen = handler.message_read(buf.data(), buf.size());
 
 		LOG_TRACE("read got " << readlen << " B");
 
