@@ -24,14 +24,14 @@ namespace msg {
 		// call the dispatcher procedure
 		dispatcher,
 
-		// call the `process` procedure
-		process,
-
 		// call the `setParameter` procedure
 		set_parameter,
 
 		// call the `getParameter` procedure
 		get_parameter,
+
+		// call the `process` procedure
+		process,
 
 		// call the `processReplacing` procedure
 		process_replacing,
@@ -92,6 +92,25 @@ namespace msg {
 	struct set_parameter_response {
 		inline friend std::ostream &operator<<(std::ostream &os, const set_parameter_response &req) {
 			return os << "set_parameter_response{}";
+		}
+	};
+
+	template <typename T>
+	struct process_request {
+		VstInt32 index;
+		VstInt32 num_inputs;
+		VstInt32 num_outputs;
+		T **inputs;
+		T **outputs;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const process_request &req) {
+			return os << "process_request{ num_inputs=" << req.num_inputs << " num_outputs=" << req.num_outputs << " inputs=" << reinterpret_cast<void *>(req.inputs) << " output=" << reinterpret_cast<void *>(req.outputs) << " }";
+		}
+	};
+
+	struct process_response {
+		inline friend std::ostream &operator<<(std::ostream &os, const process_response &req) {
+			return os << "process_response{}";
 		}
 	};
 

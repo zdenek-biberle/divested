@@ -5,6 +5,14 @@
 #include "common/msg/type.hpp"
 #include "pluginterfaces/vst2.x/aeffectx.h"
 
+plugin_t &get_plugin(AEffect* effect) {
+	return *reinterpret_cast<plugin_t *>(effect->user);
+}
+
+client_t &get_client(AEffect* effect) {
+	return get_plugin(effect).get_client();
+}
+
 VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt) {
 	msg::dispatcher_request request{index, value, ptr, opt};
 	array_buffer buf;
@@ -18,8 +26,8 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 		return 0;
 	}
 
-	// get a ckuebt 
-	auto &plugin = *reinterpret_cast<plugin_t*>(effect->user);
+	// get the plugin & a client
+	auto &plugin = get_plugin(effect);
 	auto &client = plugin.get_client();
 	auto result = msg::send_dispatcher(client, buf, opcode, request);
 	LOG_TRACE("aeffect_dispatcher_proc finished with result " << result);
@@ -57,11 +65,27 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 }
 
 void VSTCALLBACK aeffect_process_proc(AEffect* effect, float** inputs, float** outputs, VstInt32 sampleFrames) {
-	//throw std::runtime_error("CLIENT: Don't yet know how to process.");
+	auto &client = get_client(effect);
+	msg::process_request<float> request{sampleFrames, effect->numInputs, effect->numOutputs, inputs, outputs};
+	LOG_TRACE("aeffect_process_proc called, effect=" << reinterpret_cast<void *>(effect) << " request=" << request);
+	array_buffer buf;
+	msg::send_process(client, buf, request);
 }
 
-void VSTCALLBACK aeffect_process_double_proc(AEffect* effect, double** inputs, double** outputs, VstInt32 sampleFrames) {
-	//throw std::runtime_error("CLIENT: Don't yet know how to process doubles.");
+void VSTCALLBACK aeffect_process_replacing_proc(AEffect* effect, float** inputs, float** outputs, VstInt32 sampleFrames) {
+	auto &client = get_client(effect);
+	msg::process_request<float> request{sampleFrames, effect->numInputs, effect->numOutputs, inputs, outputs};
+	LOG_TRACE("aeffect_process_replacing_proc called, effect=" << reinterpret_cast<void *>(effect) << " request=" << request);
+	array_buffer buf;
+	msg::send_process_replacing(client, buf, request);
+}
+
+void VSTCALLBACK aeffect_process_double_replacing_proc(AEffect* effect, double** inputs, double** outputs, VstInt32 sampleFrames) {
+	auto &client = get_client(effect);
+	msg::process_request<double> request{sampleFrames, effect->numInputs, effect->numOutputs, inputs, outputs};
+	LOG_TRACE("aeffect_process_double_replacing_proc called, effect=" << reinterpret_cast<void *>(effect) << " request=" << request);
+	array_buffer buf;
+	msg::send_process_double_replacing(client, buf, request);
 }
 
 void VSTCALLBACK aeffect_set_parameter_proc(AEffect* effect, VstInt32 index, float parameter) {

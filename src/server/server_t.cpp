@@ -95,6 +95,18 @@ void server_t::set_parameter(VstInt32 index, float opt) {
 	effect->setParameter(effect, index, opt);
 }
 
+void server_t::process(float **inputs, float **outputs, VstInt32 samples) {
+	effect->process(effect, inputs, outputs, samples);
+}
+
+void server_t::process_replacing(float **inputs, float **outputs, VstInt32 samples) {
+	effect->processReplacing(effect, inputs, outputs, samples);
+}
+
+void server_t::process_double_replacing(double **inputs, double **outputs, VstInt32 samples) {
+	effect->processDoubleReplacing(effect, inputs, outputs, samples);
+}
+
 void server_t::instantiate_handler(int index) {
 	LOG_TRACE("Starting thread for server with index " << index);
 	auto data = new start_thread_t{this, index};

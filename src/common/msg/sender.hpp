@@ -94,6 +94,21 @@ namespace msg {
 	}
 
 	template <typename Handler, size_t BufLen>
+	void send_process(Handler &handler, std::array<char, BufLen> &buf, const process_request<float> &request) {
+		send_message<general::process, process_response>(handler, buf, type_t::process, request);
+	}
+
+	template <typename Handler, size_t BufLen>
+	void send_process_replacing(Handler &handler, std::array<char, BufLen> &buf, const process_request<float> &request) {
+		send_message<general::process_replacing, process_response>(handler, buf, type_t::process_replacing, request);
+	}
+
+	template <typename Handler, size_t BufLen>
+	void send_process_double_replacing(Handler &handler, std::array<char, BufLen> &buf, const process_request<double> &request) {
+		send_message<general::process_double_replacing, process_response>(handler, buf, type_t::process_double_replacing, request);
+	}
+
+	template <typename Handler, size_t BufLen>
 	void send_instantiate_handler(Handler &handler, std::array<char, BufLen> &buf, const instantiate_handler_request &request) {
 		send_message<general::instantiate_handler, instantiate_handler_response>(handler, buf, type_t::instantiate_handler, request);
 	}

@@ -29,6 +29,9 @@ struct server_t : public handler::with_shm {
 	VstIntPtr dispatcher(VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
 	float get_parameter(VstInt32 index);
 	void set_parameter(VstInt32 index, float opt);
+	void process(float **inputs, float **outputs, VstInt32 samples);
+	void process_replacing(float **inputs, float **outputs, VstInt32 samples);
+	void process_double_replacing(double **inputs, double **outputs, VstInt32 samples);
 	void instantiate_handler(int index);
 
 	ssize_t message_read(char *buf, size_t len);

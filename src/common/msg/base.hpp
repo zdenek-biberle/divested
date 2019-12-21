@@ -41,6 +41,21 @@ namespace msg {
 	// This is just a shortcut for payload_ptr of in_str.
 	using str_in_ptr = payload_ptr<casted_ptr<char, in_str>>;
 
+	struct inputs {};
+	template <typename T> constexpr bool has_inputs = std::is_base_of_v<inputs, T>;
+	template <typename T> constexpr bool has_num_inputs = std::is_base_of_v<inputs, T>;
+
+	struct outputs_tag {};
+	struct accumulating_outputs : outputs_tag {};
+	struct replacing_outputs : outputs_tag {};
+	template <typename T> constexpr bool has_outputs = std::is_base_of_v<outputs_tag, T>;
+	template <typename T> constexpr bool has_num_outputs = has_outputs<T>;
+	template <typename T> constexpr bool has_accumulating_outputs = std::is_base_of_v<accumulating_outputs, T>;
+	template <typename T> constexpr bool has_replacing_outputs = std::is_base_of_v<replacing_outputs, T>;
+
+	struct accumulating : inputs, accumulating_outputs {};
+	struct replacing : inputs, replacing_outputs {};
+
 	struct plain_ret {};
 	template <typename T> constexpr bool has_plain_ret = std::is_base_of_v<plain_ret, T>;
 }

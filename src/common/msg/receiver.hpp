@@ -15,8 +15,9 @@ namespace msg {
 	void process_message(Handler &handler, std::array<char, BufLen> &buf, size_t offset);
 
 	template <typename Handler>
-	static void handle_process(Handler &handler, char *buf, size_t offset) {
-		throw std::runtime_error("Don't yet know how to handle processing.");
+	static process_response handle_process(Handler &handler, const process_request<float> &req) {
+		handler.process(req.inputs, req.outputs, req.index);
+		return process_response{};
 	}
 
 	template <typename Handler>
@@ -31,13 +32,15 @@ namespace msg {
 	}
 
 	template <typename Handler>
-	static void handle_process_replacing(Handler &handler, char *buf, size_t offset) {
-		throw std::runtime_error("Don't yet know how to handle `process_replacing`.");
+	static process_response handle_process_replacing(Handler &handler, const process_request<float> &req) {
+		handler.process_replacing(req.inputs, req.outputs, req.index);
+		return process_response{};
 	}
 
 	template <typename Handler>
-	static void handle_process_double_replacing(Handler &handler, char *buf, size_t offset) {
-		throw std::runtime_error("Don't yet know how to handle `process_double_replacing`.");
+	static process_response handle_process_double_replacing(Handler &handler, const process_request<double> &req) {
+		handler.process_double_replacing(req.inputs, req.outputs, req.index);
+		return process_response{};
 	}
 
 	template <typename Handler>
@@ -56,7 +59,7 @@ namespace msg {
 		if constexpr (Handler::message_configuration::is_plugin) {
 			switch (msg_type) {
 				case type_t::process:
-					handle_process(handler, buf.data(), offset);
+					process_message<general::process, Handler, process_request<float>, process_response, &handle_process<Handler>>(handler, buf, offset);
 					return;
 
 				case type_t::set_parameter:
@@ -68,11 +71,11 @@ namespace msg {
 					return;
 
 				case type_t::process_replacing:
-					handle_process_replacing(handler, buf.data(), offset);
+					process_message<general::process_replacing, Handler, process_request<float>, process_response, &handle_process_replacing<Handler>>(handler, buf, offset);
 					return;
 					
 				case type_t::process_double_replacing:
-					handle_process_double_replacing(handler, buf.data(), offset);
+					process_message<general::process_double_replacing, Handler, process_request<double>, process_response, &handle_process_double_replacing<Handler>>(handler, buf, offset);
 					return;
 
 				case type_t::instantiate_handler:

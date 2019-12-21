@@ -131,8 +131,8 @@ void plugin_t::wait_for_effect() {
 	shared.effect.process = &aeffect_process_proc;
 	shared.effect.setParameter = &aeffect_set_parameter_proc;
 	shared.effect.getParameter = &aeffect_get_parameter_proc;
-	shared.effect.processReplacing = &aeffect_process_proc;
-	shared.effect.processDoubleReplacing = &aeffect_process_double_proc;
+	shared.effect.processReplacing = &aeffect_process_replacing_proc;
+	shared.effect.processDoubleReplacing = &aeffect_process_double_replacing_proc;
 	shared.effect.user = reinterpret_cast<void*>(this);
 	shared.effect.object = nullptr; // TODO: try setting this to a not null value when everything else works to see if the DAW breaks
 	shared.effect.flags &= ~effFlagsHasEditor;
