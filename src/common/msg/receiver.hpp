@@ -92,22 +92,22 @@ namespace msg {
 
 	template <typename Handler, size_t BufLen>
 	size_t receive_message(Handler &handler, std::array<char, BufLen> &buf) {
-		ssize_t readlen = handler.message_read(buf.data(), buf.size());
+		while (true) {
+			ssize_t readlen = handler.message_read(buf.data(), buf.size());
 
-		LOG_TRACE("read got " << readlen << " B");
+			LOG_TRACE("read got " << readlen << " B");
 
-		size_t offset = 0;
-		type_t msg_type;
-		offset += io::read_data(buf.data(), offset, msg_type);
+			size_t offset = 0;
+			type_t msg_type;
+			offset += io::read_data(buf.data(), offset, msg_type);
 
-		LOG_TRACE("Got message type " << type_to_name(msg_type));
+			LOG_TRACE("Got message type " << type_to_name(msg_type));
 
-		if (msg_type == type_t::return_)
-			return offset;
+			if (msg_type == type_t::return_)
+				return offset;
 
-		dispatch_received_message_to_handler(handler, buf, offset, msg_type);
-		
-		return receive_message(handler, buf);
+			dispatch_received_message_to_handler(handler, buf, offset, msg_type);
+		}
 	}
 }
 
