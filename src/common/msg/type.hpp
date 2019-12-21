@@ -13,7 +13,8 @@
 	F(set_parameter) \
 	F(get_parameter) \
 	F(process_replacing) \
-	F(process_double_replacing)
+	F(process_double_replacing) \
+	F(instantiate_handler)
 
 namespace msg {
 	enum class type_t {
@@ -37,6 +38,9 @@ namespace msg {
 
 		// call the `processDoubleReplacing` procedure
 		process_double_replacing,
+
+		// instantiate a handler for a new thread
+		instantiate_handler,
 	};
 
 	const char *type_to_name(type_t type) {
@@ -99,6 +103,20 @@ namespace msg {
 	struct set_parameter_response {
 		inline friend std::ostream &operator<<(std::ostream &os, const set_parameter_response &req) {
 			return os << "set_parameter_response{}";
+		}
+	};
+
+	struct instantiate_handler_request {
+		int index;
+
+		inline friend std::ostream &operator<<(std::ostream &os, const instantiate_handler_request &req) {
+			return os << "instantiate_handler_request{ index=" << req.index << " }";
+		}
+	};
+
+	struct instantiate_handler_response {
+		inline friend std::ostream &operator<<(std::ostream &os, const instantiate_handler_response &res) {
+			return os << "instantiate_handler_response{}";
 		}
 	};
 }

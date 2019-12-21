@@ -12,7 +12,7 @@ namespace msg {
 	template <typename Handler, size_t BufLen>
 	void send_return(Handler &handler, std::array<char, BufLen> &buf) {
 		size_t offset = 0;
-		log::log() << "Sending plain return" << std::endl;
+		LOG_TRACE("Sending plain return");
 		offset += io::write_data(buf.data(), offset, type_t::return_);
 		handler.message_write(buf.data(), offset);
 	}
@@ -20,7 +20,7 @@ namespace msg {
 	template <typename Handler, size_t BufLen, typename Payload>
 	void send_return_payload(Handler &handler, std::array<char, BufLen> &buf, const Payload &payload) {
 		size_t offset = 0;
-		log::log() << "Sending return with payload of size " << sizeof(Payload) << std::endl;
+		LOG_TRACE("Sending return with payload of size " << sizeof(Payload));
 		offset += io::write_data(buf.data(), offset, type_t::return_);
 		offset += io::write_data(buf.data(), offset, payload);
 		handler.message_write(buf.data(), offset);
@@ -28,7 +28,7 @@ namespace msg {
 
 	template <typename Msg, typename Response, typename Request, typename Handler, size_t BufLen>
 	void send_return_dispatcher(Handler &handler, std::array<char, BufLen> &buf, size_t shm_offset, size_t shm_size, const Request &request, const Response &response) {
-		log::log() << "Sending return for dispatcher message " << message_name<Msg> << std::endl;
+		LOG_TRACE("Sending return for dispatcher message " << message_name<Msg>);
 
 		io::buf pipe{buf.data(), 0};
 		io::buf shm{handler.shm(), shm_offset};
@@ -38,7 +38,7 @@ namespace msg {
 		io::write_response<Msg>(resp_ctx, request, response);
 
 		if (shm.total() || shm.total() != shm_size)
-			log::log() << "write_response wrote " << shm.total() << " B of shm (compared to " << shm_size << " B)" << std::endl;
+			LOG_TRACE("write_response wrote " << shm.total() << " B of shm (compared to " << shm_size << " B)");
 
 		handler.shm_pop(shm_size);
 		handler.message_write(buf.data(), pipe.total());	
@@ -46,8 +46,8 @@ namespace msg {
 
 	template <typename Msg, typename Response, typename Handler, size_t BufLen, typename Body>
 	Response send_message(Handler &handler, std::array<char, BufLen> &buf, type_t type, const Body &body) {
-		log::log() << "Sending dispatcher call for message " << message_name<Msg> << std::endl;
-		log::log() << body << std::endl;
+		LOG_TRACE("Sending dispatcher call for message " << message_name<Msg>);
+		LOG_TRACE(body);
 
 		size_t shm_offset = handler.shm_offset();
 
@@ -71,7 +71,7 @@ namespace msg {
 		io::read_response<Msg>(resp_ctx, body, response);
 
 		if (req_shm.total() != resp_shm.total())
-			log::log() << "Written shm size (" << req_shm.total() << " B) does not equal read shm size (" << resp_shm.total() << " B)" << std::endl;
+			LOG_TRACE("Written shm size (" << req_shm.total() << " B) does not equal read shm size (" << resp_shm.total() << " B)");
 
 		handler.shm_pop(req_shm.total());
 
@@ -91,6 +91,11 @@ namespace msg {
 	template <typename Handler, size_t BufLen>
 	void send_set_parameter(Handler &handler, std::array<char, BufLen> &buf, const set_parameter_request &request) {
 		send_message<general::set_parameter, set_parameter_response>(handler, buf, type_t::set_parameter, request);
+	}
+
+	template <typename Handler, size_t BufLen>
+	void send_instantiate_handler(Handler &handler, std::array<char, BufLen> &buf, const instantiate_handler_request &request) {
+		send_message<general::instantiate_handler, instantiate_handler_response>(handler, buf, type_t::instantiate_handler, request);
 	}
 }
 

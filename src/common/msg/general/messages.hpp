@@ -5,11 +5,13 @@
 
 #define MSG_GENERAL_MESSAGES(F) \
 	F(get_parameter) \
-	F(set_parameter)
+	F(set_parameter) \
+	F(instantiate_handler)
 
 namespace msg::general {
 	struct get_parameter : index, plain_ret {};
 	struct set_parameter : index, opt {};
+	struct instantiate_handler : index {};
 };
 
 #endif

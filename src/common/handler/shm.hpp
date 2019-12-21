@@ -10,6 +10,11 @@ namespace handler {
 			_shm{std::move(shm)},
 			_shm_offset{0}
 		{}
+		
+		inline with_shm(handler::with_shm &&other):
+			_shm{std::move(other._shm)},
+			_shm_offset{other._shm_offset}
+		{}
 
 		inline char *shm() const {
 			return reinterpret_cast<char *>(_shm.memory());
@@ -20,12 +25,12 @@ namespace handler {
 		}
 
 		inline void shm_push(size_t bytes) {
-			log::log() << "Pushing " << bytes << " B of shm space" << std::endl;
+			LOG_TRACE("Pushing " << bytes << " B of shm space");
 			_shm_offset += bytes;
 		}
 
 		inline void shm_pop(size_t bytes) {
-			log::log() << "Popping " << bytes << " B of shm space" << std::endl;
+			LOG_TRACE("Popping " << bytes << " B of shm space");
 			_shm_offset -= bytes;	
 		}
 

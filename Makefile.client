@@ -4,6 +4,7 @@ EXE_DIR = bin
 
 SOURCES = \
 	client/main \
+	common/path/build_for_handler \
 	common/shm/shm \
 	common/util/random_string \
 	common/util/str_writer \

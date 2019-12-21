@@ -57,8 +57,7 @@ namespace shm {
 		return memory;
 	}
 
-	shm_t shm_t::create() {
-		std::string name = "/divested." + util::random_string(32);	
+	shm_t shm_t::create(const std::string &name) {
 		int fd = open_shm(name, O_RDWR | O_CREAT | O_EXCL);
 		resize_shm(fd);
 		auto memory = mmap_and_close_shm(fd);
@@ -77,6 +76,13 @@ namespace shm {
 			ss << "Unlinking shared memory region `" << _name << "` failed: " << ::strerror(errno);
 			throw std::runtime_error{ss.str()};
 		}
+	}
+
+	void *shm_t::memory() const {
+		if (_memory == MAP_FAILED)
+			throw std::runtime_error("Shared memory has been moved");
+
+		return _memory;
 	}
 
 	shm_t::shm_t(const std::string &name, void *memory):

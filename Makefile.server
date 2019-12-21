@@ -4,6 +4,7 @@ EXE_DIR = bin
 
 SOURCES = \
 	server/main \
+	common/path/build_for_handler \
 	common/shm/shm \
 	common/util/random_string \
 	common/util/str_writer \
@@ -17,6 +18,7 @@ override CXXFLAGS += \
 	-D_UNICODE \
 	-DVST_FORCE_DEPRECATED=0 \
 	-DNONAMELESSUNION \
+	-DNOMINMAX \
 	-mwindows \
 	-fno-short-wchar \
 	-std=c++17 \
@@ -49,6 +51,6 @@ $(OBJECTS_DIR)/%.o: $(SOURCES_DIR)/%.cpp force
 
 $(EXE_FILE): $(OBJECTS_FILES)
 	mkdir -p $(EXE_DIR)
-	$(CXX) $(CSSFLAGS) $(LDFLAGS) -o $@ $(OBJECTS_FILES) $(addprefix -l,$(LIBS))
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJECTS_FILES) $(addprefix -l,$(LIBS))
 
 

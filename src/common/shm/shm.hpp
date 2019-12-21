@@ -8,7 +8,7 @@ namespace shm {
 	
 	struct shm_t {
 		/// Creates a new region of shared memory
-		static shm_t create();
+		static shm_t create(const std::string &name);
 		
 		/// Opens an existing region of shared memory when given its name
 		static shm_t open(const std::string &name);
@@ -29,9 +29,7 @@ namespace shm {
 			return _name;
 		}
 
-		inline void *memory() const {
-			return _memory;
-		}
+		void *memory() const;
 
 	private:
 		shm_t(const std::string &name, void *memory);
