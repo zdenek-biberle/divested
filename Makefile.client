@@ -3,7 +3,13 @@ OBJECTS_DIR = obj
 EXE_DIR = bin
 
 SOURCES = \
+	client/client_t \
+	client/callbacks \
+	client/log \
 	client/main \
+	client/paths_t \
+	client/plugin_t \
+	client/shared_t \
 	common/msg/type \
 	common/path/build_for_handler \
 	common/shm/shm \
