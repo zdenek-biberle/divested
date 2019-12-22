@@ -7,4 +7,7 @@
 /// Implements streaming to ostream for VstParameterProperties
 std::ostream &operator<<(std::ostream &os, const VstParameterProperties& obj);
 
+/// Implements streaming to ostream for VstPinProperties
+std::ostream &operator<<(std::ostream &os, const VstPinProperties& obj);
+
 #endif

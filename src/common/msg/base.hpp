@@ -36,10 +36,14 @@ namespace msg {
 
 	// This is just a shortcut for payload_ptr of out_array<char, ...>
 	template <size_t Size>
-	using str_out_ptr = payload_ptr<casted_ptr<char, out_array<char, Size, out_array_show_str>>>;
+	using str_out_ptr = payload_ptr<casted_ptr<char, shm_array_out<char, Size, show_str>>>;
 
 	// This is just a shortcut for payload_ptr of sized_in_array<char, ...>
 	using str_in_ptr = payload_ptr<casted_ptr<char, sized_in_array<char, sized_in_array_str>>>;
+
+	// ptr is a pointer to a single element, used either as input, output or both
+	template <typename T, template <typename> typename ShmArray1>
+	using ptr_to_1 = payload_ptr<casted_ptr<T, ShmArray1<T>>>;
 
 	struct inputs {};
 	template <typename T> constexpr bool has_inputs = std::is_base_of_v<inputs, T>;

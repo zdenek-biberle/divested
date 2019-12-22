@@ -118,31 +118,98 @@ namespace msg {
 		}
 	};
 
-	/// Shows the contents of out_array as a string.
-	struct out_array_show_str {
-		static inline std::ostream &show(std::ostream &os, char *ptr, size_t size) {
+	/// Shows the contents of a pointer to chars as a C string.
+	struct show_str {
+		static inline std::ostream &show_request(std::ostream &os, char *ptr, size_t size) {
+			return os << util::str_writer{ptr, size};
+		}
+
+		template <typename Response>
+		static std::ostream &show_response(std::ostream &os, char *ptr, size_t size, const Response &response) {
 			return os << util::str_writer{ptr, size};
 		}
 	};
 
-	/// Shows the contents of out_single directly.
-	template <typename T>
-	struct out_single_direct {
-		static std::ostream &show(std::ostream &os, T *ptr, size_t size) {
+	/// Showing the contents of a pointer directly.
+	struct show_direct {
+		template <typename T>
+		static std::ostream &show_request(std::ostream &os, T *ptr, size_t size) {
+			return os << *ptr;
+		}
+
+		template <typename T, typename Response>
+		static std::ostream &show_response(std::ostream &os, T *ptr, size_t size, const Response &response) {
 			return os << *ptr;
 		}
 	};
 
-	/// An array of items that serves as an output from the dispatcher. It is
-	/// allocated within shm, filled within the dispatcher and then copied
-	/// to its expected location.
-	template <typename T, size_t Size, typename Show>
-	struct out_array {
-		template <typename Ctx>
-		static void write_request(const Ctx &ctx, T *ptr) {
-			ctx.shm.template skip_data_array<T>(Size);
-		}
+	/// Possible request/response behaviours of shm_array
+	struct shm_array_behaviour {
+		// Data will be copied to the shm when sending the request
+		template <typename T, size_t Size, typename Show>
+		struct request_write {
+			template <typename Ctx>
+			static void write_request(const Ctx &ctx, T *ptr) {
+				ctx.shm.write_data_array(ptr, Size);
+			}
 
+			static inline std::ostream &show_request(std::ostream &os, T *ptr) {
+				return Show::show_request(os, ptr, Size);
+			}
+		};
+
+		// Data won't be copied to the shm when sending the request
+		template <typename T, size_t Size, typename Show>
+		struct request_skip {
+			template <typename Ctx>
+			static void write_request(const Ctx &ctx, T *ptr) {
+				ctx.shm.template skip_data_array<T>(Size);
+			}
+
+			static inline std::ostream &show_request(std::ostream &os, T *ptr) {
+				return os << "N/A";
+			}
+		};
+
+		// Data will be read from the shm when receiving the response
+		template <typename T, size_t Size, typename Show>
+		struct response_read {
+			template <typename Ctx, typename Response>
+			static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
+				ctx.shm.template skip_data_array<T>(Size);
+			}
+
+			template <typename Response>
+			static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
+				return os << "N/A";
+			}
+		};
+
+		// Data won't be read from the shm when receiving the response
+		template <typename T, size_t Size, typename Show>
+		struct response_skip {
+			template <typename Ctx, typename Response>
+			static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
+				ctx.shm.read_data_array(ptr, Size);
+			}
+
+			template <typename Response>
+			static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
+				return Show::show_response(os, ptr, Size, response);
+			}
+		};
+	};
+
+	/// An array of elements that's mapped to the shm. Used either as input,
+	/// output or both.
+	template <
+		typename T,
+		size_t Size,
+		typename Show,
+		template <typename, size_t, typename> typename RequestBehaviour,
+		template <typename, size_t, typename> typename ResponseBehaviour
+	>
+	struct shm_array : RequestBehaviour<T, Size, Show>, ResponseBehaviour<T, Size, Show> {
 		template <typename Ctx>
 		static void read_request(const Ctx &ctx, T *&ptr) {
 			ctx.shm.map_data_array(ptr, Size);
@@ -152,25 +219,15 @@ namespace msg {
 		static void write_response(const Ctx &ctx, T *ptr, const Response &response) {
 			ctx.shm.template skip_data_array<T>(Size);
 		}
-
-		template <typename Ctx, typename Response>
-		static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
-			ctx.shm.read_data_array(ptr, Size);
-		}
-
-		static inline std::ostream &show_request(std::ostream &os, T *ptr) {
-			return os << "N/A";
-		}
-
-		template <typename Response>
-		static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
-			return Show::show(os, ptr, Size);
-		}
 	};
 
-	template <typename T>
-	struct out_single : public out_array<T, 1, out_single_direct<T>>
-	{};
+	template <typename T, size_t Size, typename Show> using shm_array_in = shm_array<T, Size, Show, shm_array_behaviour::request_write, shm_array_behaviour::response_skip>;
+	template <typename T, size_t Size, typename Show> using shm_array_out = shm_array<T, Size, Show, shm_array_behaviour::request_skip, shm_array_behaviour::response_read>;
+	template <typename T, size_t Size, typename Show> using shm_array_inout = shm_array<T, Size, Show, shm_array_behaviour::request_write, shm_array_behaviour::response_read>;
+
+	template <typename T> using shm_in_1 = shm_array_in<T, 1, show_direct>;
+	template <typename T> using shm_out_1 = shm_array_out<T, 1, show_direct>;
+	template <typename T> using shm_inout_1 = shm_array_inout<T, 1, show_direct>;
 
 
 	/// This is the output of getChunk. A pointer is allocated within the shm,

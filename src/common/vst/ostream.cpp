@@ -25,3 +25,12 @@ std::ostream &operator<<(std::ostream &os, const VstParameterProperties& obj) {
 		OUT_STR(categoryLabel)
 	OBJ_END;
 }
+
+std::ostream &operator<<(std::ostream &os, const VstPinProperties& obj) {
+	OBJ_START(VstInProperties)
+		OUT_STR(label)
+		OUT(flags)
+		OUT(arrangementType)
+		OUT_STR(shortLabel)
+	OBJ_END;
+}

@@ -40,10 +40,10 @@
 	/* F(copy_program) */ \
 	F(connect_input) \
 	F(connect_output) \
-	/* F(get_input_properties) */ \
-	/* F(get_output_properies) */ \
+	F(get_input_properties) \
+	F(get_output_properies) \
 	F(get_plug_category) \
-	/* F(get_current_position) */ \
+	F(get_current_position) \
 	/* F(get_destionation_buffer) */ \
 	/* F(offline_notify) */ \
 	/* F(offline_prepare) */ \
@@ -122,8 +122,8 @@ namespace msg::effect {
 	// struct copy_program : public msg<effCopyProgram> {};
 	struct connect_input : public msg<effConnectInput>, index, value, plain_ret {};
 	struct connect_output : public msg<effConnectOutput>, index, value, plain_ret {};
-	// struct get_input_properties : public msg<effGetInputProperties> {};
-	// struct get_output_properies : public msg<effGetOutputProperies> {};
+	struct get_input_properties : public msg<effGetInputProperties>, index, ptr_to_1<VstPinProperties, shm_inout_1>, plain_ret {};
+	struct get_output_properies : public msg<effGetOutputProperties>, index, ptr_to_1<VstPinProperties, shm_inout_1>, plain_ret {};
 	struct get_plug_category : public msg<effGetPlugCategory>, plain_ret {};
 	struct get_current_position : public msg<effGetCurrentPosition>, plain_ret {};
 	// struct get_destionation_buffer : public msg<effGetDestionationBuffer> {};
@@ -145,7 +145,7 @@ namespace msg::effect {
 	struct idle : public msg<effIdle>, plain_ret {};
 	// struct get_icon : public msg<effGetIcon> {};
 	// struct set_view_position : public msg<effSetViewPosition> {};
-	struct get_parameter_properties : public msg<effGetParameterProperties>, index, payload_ptr<casted_ptr<VstParameterProperties, out_single<VstParameterProperties>>>, plain_ret {};
+	struct get_parameter_properties : public msg<effGetParameterProperties>, index, ptr_to_1<VstParameterProperties, shm_inout_1>, plain_ret {};
 	// struct keys_required : public msg<effKeysRequired> {};
 	struct get_vst_version : public msg<effGetVstVersion>, plain_ret {};
 	struct edit_key_down : public msg<effEditKeyDown>, index, value, opt, plain_ret {};
