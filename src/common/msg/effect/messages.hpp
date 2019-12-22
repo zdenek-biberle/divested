@@ -16,7 +16,7 @@
 	F(get_param_label) \
 	F(get_param_display) \
 	F(get_param_name) \
-	/* F(get_vu) */ \
+	F(get_vu) \
 	F(set_sample_rate) \
 	F(set_block_size) \
 	F(mains_changed) \
@@ -29,17 +29,17 @@
 	F(edit_idle) \
 	/* F(edit_top) */ \
 	/* F(edit_sleep) */ \
-	/* F(identify) */ \
+	F(identify) \
 	F(get_chunk) \
 	/* F(set_chunk) */ \
 	/* F(process_events) */ \
 	F(can_be_automated) \
 	F(string2parameter) \
-	/* F(get_num_program_categories) */ \
+	F(get_num_program_categories) \
 	F(get_program_name_indexed) \
 	/* F(copy_program) */ \
-	/* F(connect_input) */ \
-	/* F(connect_output) */ \
+	F(connect_input) \
+	F(connect_output) \
 	/* F(get_input_properties) */ \
 	/* F(get_output_properies) */ \
 	F(get_plug_category) \
@@ -98,7 +98,7 @@ namespace msg::effect {
 	struct get_param_label : public msg<effGetParamLabel>, index, str_out_ptr<kVstMaxParamStrLen> {};
 	struct get_param_display : public msg<effGetParamDisplay>, index, str_out_ptr<kVstMaxParamStrLen> {};
 	struct get_param_name : public msg<effGetParamName>, index, str_out_ptr<kVstMaxParamStrLen> {};
-	// struct get_vu : public msg<effGetVu> {};
+	struct get_vu : public msg<effGetVu>, plain_ret {};
 	struct set_sample_rate : public msg<effSetSampleRate>, opt {};
 	struct set_block_size : public msg<effSetBlockSize>, value {};
 	struct mains_changed : public msg<effMainsChanged>, value {};
@@ -111,21 +111,21 @@ namespace msg::effect {
 	struct edit_idle : public msg<effEditIdle> {};
 	// struct edit_top : public msg<effEditTop> {};
 	// struct edit_sleep : public msg<effEditSleep> {};
-	// struct identify : public msg<effIdentify> {};
+	struct identify : public msg<effIdentify>, plain_ret {};
 	struct get_chunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char *, chunk_out>>, plain_ret {};
 	// struct set_chunk : public msg<effSetChunk> {};
 	// struct process_events : public msg<effProcessEvents> {};
 	struct can_be_automated : public msg<effCanBeAutomated>, index, plain_ret {};
 	struct string2parameter : public msg<effString2Parameter>, index, str_in_ptr, plain_ret {};
-	// struct get_num_program_categories : public msg<effGetNumProgramCategories> {};
+	struct get_num_program_categories : public msg<effGetNumProgramCategories>, plain_ret {};
 	struct get_program_name_indexed : public msg<effGetProgramNameIndexed>, index, str_out_ptr<kVstMaxProgNameLen>, plain_ret {};
 	// struct copy_program : public msg<effCopyProgram> {};
-	// struct connect_input : public msg<effConnectInput> {};
-	// struct connect_output : public msg<effConnectOutput> {};
+	struct connect_input : public msg<effConnectInput>, index, value, plain_ret {};
+	struct connect_output : public msg<effConnectOutput>, index, value, plain_ret {};
 	// struct get_input_properties : public msg<effGetInputProperties> {};
 	// struct get_output_properies : public msg<effGetOutputProperies> {};
 	struct get_plug_category : public msg<effGetPlugCategory>, plain_ret {};
-	// struct get_current_position : public msg<effGetCurrentPosition> {};
+	struct get_current_position : public msg<effGetCurrentPosition>, plain_ret {};
 	// struct get_destionation_buffer : public msg<effGetDestionationBuffer> {};
 	// struct offline_notify : public msg<effOfflineNotify> {};
 	// struct offline_prepare : public msg<effOfflinePrepare> {};
