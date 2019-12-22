@@ -10,8 +10,11 @@
 static created_resources_t create_resources(const paths_t &base_paths, int index) {
 	paths_t paths{base_paths, index};
 
-	LOG_TRACE("mkfifo send: " << ::mkfifo(paths.send.c_str(), S_IRUSR | S_IWUSR));
-	LOG_TRACE("mkfifo recv: " << ::mkfifo(paths.recv.c_str(), S_IRUSR | S_IWUSR));
+	auto send_res = ::mkfifo(paths.send.c_str(), S_IRUSR | S_IWUSR);
+	auto recv_res = ::mkfifo(paths.recv.c_str(), S_IRUSR | S_IWUSR);
+
+	LOG_TRACE("mkfifo send: " << send_res);
+	LOG_TRACE("mkfifo recv: " << recv_res);
 
 	shm::shm_t shm{shm::shm_t::create(paths.shm)};
 

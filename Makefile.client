@@ -1,3 +1,8 @@
+# Config options
+DIVESTED_SERVER_PATH = divested-server.exe
+DIVESTED_PLUGIN_PATH = .
+# End of config options
+
 SOURCES_DIR = src
 OBJECTS_DIR = obj
 EXE_DIR = bin
@@ -10,6 +15,9 @@ SOURCES = \
 	client/paths_t \
 	client/plugin_t \
 	client/shared_t \
+	common/config/config_t \
+	common/config/read \
+	common/config/resolve_paths \
 	common/msg/type \
 	common/path/build_for_handler \
 	common/shm/shm \
@@ -23,6 +31,8 @@ override CXXFLAGS += \
 	-Wall \
 	-D__cdecl= \
 	-DVST_FORCE_DEPRECATED=0 \
+	-DDIVESTED_SERVER_PATH=$(DIVESTED_SERVER_PATH) \
+	-DDIVESTED_PLUGIN_PATH=$(DIVESTED_PLUGIN_PATH) \
 	-std=c++17 \
 	-fPIC \
 	-ggdb
@@ -33,7 +43,8 @@ LDFLAGS = \
 LIBS = \
 	dl \
 	stdc++fs \
-	rt
+	rt \
+	config++
 
 OBJECTS_FILES = $(addprefix $(OBJECTS_DIR)/,$(addsuffix .o,$(SOURCES)))
 EXE_FILE = $(EXE_DIR)/$(EXE)
