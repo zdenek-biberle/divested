@@ -176,12 +176,12 @@ namespace msg {
 		struct response_read {
 			template <typename Ctx, typename Response>
 			static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
-				ctx.shm.template skip_data_array<T>(Size);
+				ctx.shm.read_data_array(ptr, Size);
 			}
 
 			template <typename Response>
 			static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
-				return os << "N/A";
+				return Show::show_response(os, ptr, Size, response);
 			}
 		};
 
@@ -190,12 +190,12 @@ namespace msg {
 		struct response_skip {
 			template <typename Ctx, typename Response>
 			static void read_response(const Ctx &ctx, T *ptr, const Response &response) {
-				ctx.shm.read_data_array(ptr, Size);
+				ctx.shm.template skip_data_array<T>(Size);
 			}
 
 			template <typename Response>
 			static inline std::ostream &show_response(std::ostream &os, T *ptr, const Response &response) {
-				return Show::show_response(os, ptr, Size, response);
+				return os << "N/A";
 			}
 		};
 	};
