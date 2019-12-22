@@ -57,25 +57,25 @@ namespace msg {
 	struct in_str {
 		template <typename Ctx>
 		static void write_request(const Ctx &ctx, char *ptr) {
-			ctx.shm.write_data_array(ptr, ::strlen(ptr));
+			ctx.shm.write_data_array(ptr, ::strlen(ptr) + 1);
 		}
 
 		template <typename Ctx>
 		static void read_request(const Ctx &ctx, char *&ptr) {
 			char *tmp_ptr;
 			ctx.shm.map_data_array(tmp_ptr, 0);
-			size_t len = ::strlen(tmp_ptr);
+			size_t len = ::strlen(tmp_ptr) + 1;
 			ctx.shm.map_data_array(ptr, len);
 		}
 
 		template <typename Ctx, typename Response>
 		static void write_response(const Ctx &ctx, char *ptr, const Response &response) {
-			ctx.shm.template skip_data_array<char>(::strlen(ptr));
+			ctx.shm.template skip_data_array<char>(::strlen(ptr) + 1);
 		}
 
 		template <typename Ctx, typename Response>
 		static void read_response(const Ctx &ctx, char *ptr, const Response &response) {
-			ctx.shm.template skip_data_array<char>(::strlen(ptr));
+			ctx.shm.template skip_data_array<char>(::strlen(ptr) + 1);
 		}
 
 		static inline std::ostream &show_request(std::ostream &os, char *ptr) {

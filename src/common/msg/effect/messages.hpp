@@ -11,7 +11,7 @@
 	F(close) \
 	F(set_program) \
 	F(get_program) \
-	/* F(set_program_name) */ \
+	F(set_program_name) \
 	F(get_program_name) \
 	F(get_param_label) \
 	F(get_param_display) \
@@ -93,7 +93,7 @@ namespace msg::effect {
 	struct close : public msg<effClose>, plain_ret {};
 	struct set_program : public msg<effSetProgram>, value {};
 	struct get_program : public msg<effGetProgram>, plain_ret {};
-	// struct set_program_name : public msg<effSetProgramName> {};
+	struct set_program_name : public msg<effSetProgramName>, str_in_ptr {};
 	struct get_program_name : public msg<effGetProgramName>, str_out_ptr<kVstMaxProgNameLen> {};
 	struct get_param_label : public msg<effGetParamLabel>, index, str_out_ptr<kVstMaxParamStrLen> {};
 	struct get_param_display : public msg<effGetParamDisplay>, index, str_out_ptr<kVstMaxParamStrLen> {};
