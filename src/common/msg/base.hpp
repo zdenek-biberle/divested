@@ -34,7 +34,7 @@ namespace msg {
 	
 	template <typename T> constexpr bool has_payload_ptr = std::is_base_of_v<payload_ptr_tag, T>;
 
-	// This is just a shortcut for payload_ptr of out_array<char, ...>
+	// This is just a shortcut for payload_ptr of shm_array_out<char, ...>
 	template <size_t Size>
 	using str_out_ptr = payload_ptr<casted_ptr<char, shm_array_out<char, Size, show_str>>>;
 

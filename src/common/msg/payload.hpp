@@ -5,7 +5,7 @@
 
 #include "common/msg/type.hpp"
 #include "common/util/str_writer.hpp"
-#include "pluginterfaces/vst2.x/aeffect.h"
+#include "pluginterfaces/vst2.x/aeffectx.h"
 
 namespace msg {
 	template <typename Pipe, typename Shm, typename Allocator>
@@ -337,6 +337,140 @@ namespace msg {
 			else
 				return os << "nullptr to ERect";
 		}
+	};
+
+	/// This serializes a pointer to VstEvents and all the associated data.
+	struct vst_events_out {
+		[[noreturn]] static void throw_unsupported_vst_event_type(VstInt32 type) {
+			std::stringstream ss;
+			ss << "Unsupported VST event type: " << type;
+			throw std::runtime_error(ss.str());
+		}
+
+		// VstEvents is weirdly defined - it's got a variable size, but it's defined
+		// with its last member being a two element array, so we'll just define
+		// a similar struct that will work as a header
+		struct vst_events_header {
+			VstInt32 num_events;
+			VstIntPtr reserved;
+		};
+
+		template <typename Ctx>
+		static void write_request(const Ctx &ctx, VstEvents *ptr) {
+			// serialize the header first
+			ctx.shm.write_data(*reinterpret_cast<vst_events_header *>(ptr));
+
+			// now skip the event pointer array
+			ctx.shm.template skip_data_array<VstEvent>(ptr->numEvents);
+
+			// and now serialize the individual events
+			auto events = ptr->events;
+			for (int i = 0; i < ptr->numEvents; i++) {
+				switch (events[i]->type) {
+					case kVstMidiType:
+						// midi events get simply written to the shm
+						ctx.shm.write_data(*reinterpret_cast<VstMidiEvent *>(events[i]));
+						break;
+
+					case kVstSysExType: {
+						// sysex events get written out together with the sysex data
+						auto sysex_event = reinterpret_cast<VstMidiSysexEvent *>(events[i]);
+						ctx.shm.write_data(*sysex_event);
+						ctx.shm.write_data_array(sysex_event->sysexDump, sysex_event->dumpBytes);
+						break;
+					}
+
+					default:
+						throw_unsupported_vst_event_type(events[i]->type);
+						break;
+				}
+			}
+		}
+
+		template <typename Ctx>
+		static void read_request(const Ctx &ctx, VstEvents *&ptr) {
+			// first map the VstEvents structure as if it were a vst_events_header
+			ctx.shm.map_data(reinterpret_cast<vst_events_header *&>(ptr));
+
+			// now we can skip the event pointer array
+			ctx.shm.template skip_data_array<VstEvent>(ptr->numEvents);
+
+			// and now we just deserialize the individual events
+			auto events = ptr->events;
+			for (int i = 0; i < ptr->numEvents; i++) {
+				// fake map to get the type
+				ctx.shm.map_data_array(events[i], 0);
+
+				switch (events[i]->type) {
+					case kVstMidiType:
+						// just map it
+						ctx.shm.map_data(reinterpret_cast<VstMidiEvent *&>(events[i]));
+						break;
+
+					case kVstSysExType: {
+						// map the event and then map its data
+						auto &sysex_event = reinterpret_cast<VstMidiSysexEvent *&>(events[i]);
+						ctx.shm.map_data(sysex_event);
+						ctx.shm.map_data_array(sysex_event->sysexDump, sysex_event->dumpBytes);
+						break;
+					}
+
+					default:
+						throw_unsupported_vst_event_type(events[i]->type);
+				}
+			}
+		}
+
+		template <typename Ctx>
+		static void skip_vst_events(Ctx &ctx, VstEvents *ptr) {
+			// skip the header
+			ctx.shm.template skip_data<vst_events_header>();
+
+			// skip the event pointer array
+			ctx.shm.template skip_data_array<VstEvent>(ptr->numEvents);
+
+			// skip the individual events
+			auto events = ptr->events;
+			for (int i = 0; i < ptr->numEvents; i++) {
+				switch (events[i]->type) {
+					case kVstMidiType:
+						// just skip it
+						ctx.shm.template skip_data<VstMidiEvent>();
+						break;
+
+					case kVstSysExType: {
+						// skip the event and then skip its data
+						auto &sysex_event = reinterpret_cast<VstMidiSysexEvent *&>(events[i]);
+						ctx.shm.template skip_data<VstMidiSysexEvent>();
+						ctx.shm.template skip_data_array<char>(sysex_event->dumpBytes);
+						break;
+					}
+
+					default:
+						throw_unsupported_vst_event_type(events[i]->type);
+				}
+			}
+		}
+
+		template <typename Ctx, typename Response>
+		static void write_response(const Ctx &ctx, VstEvents *ptr, const Response &response) {
+			skip_vst_events(ctx, ptr);
+		}
+
+		template <typename Ctx, typename Response>
+		static void read_response(const Ctx &ctx, VstEvents *ptr, const Response &response) {
+			skip_vst_events(ctx, ptr);
+		}
+
+		static inline std::ostream &show_request(std::ostream &os, VstEvents *ptr) {
+			return os << ptr->numEvents << " VST events";
+		}
+
+		template <typename Response>
+		static inline std::ostream &show_response(std::ostream &os, VstEvents *ptr, const Response &response) {
+			return os << "N/A";
+		}
+		
 	};
 }
 

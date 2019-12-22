@@ -32,7 +32,7 @@
 	F(identify) \
 	F(get_chunk) \
 	/* F(set_chunk) */ \
-	/* F(process_events) */ \
+	F(process_events) \
 	F(can_be_automated) \
 	F(string2parameter) \
 	F(get_num_program_categories) \
@@ -114,7 +114,7 @@ namespace msg::effect {
 	struct identify : public msg<effIdentify>, plain_ret {};
 	struct get_chunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char *, chunk_out>>, plain_ret {};
 	// struct set_chunk : public msg<effSetChunk> {};
-	// struct process_events : public msg<effProcessEvents> {};
+	struct process_events : public msg<effProcessEvents>, payload_ptr<casted_ptr<VstEvents, vst_events_out>>, plain_ret {};
 	struct can_be_automated : public msg<effCanBeAutomated>, index, plain_ret {};
 	struct string2parameter : public msg<effString2Parameter>, index, str_in_ptr, plain_ret {};
 	struct get_num_program_categories : public msg<effGetNumProgramCategories>, plain_ret {};

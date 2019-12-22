@@ -35,6 +35,11 @@ namespace msg::io {
 		}
 
 		template <typename T>
+		void map_data(T *&data) {
+			offset += ::msg::io::map_data_array(memory, offset, data, 1);
+		}
+
+		template <typename T>
 		void map_data_array(T *&data, size_t size) {
 			offset += ::msg::io::map_data_array(memory, offset, data, size);
 		}

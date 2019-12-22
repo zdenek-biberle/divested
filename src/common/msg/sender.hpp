@@ -1,6 +1,8 @@
 #ifndef MSG_SENDER_HPP
 #define MSG_SENDER_HPP
 
+#include <iostream>
+
 #include "common/msg/io/base.hpp"
 #include "common/msg/io/buf.hpp"
 #include "common/msg/base.hpp"

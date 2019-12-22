@@ -12,7 +12,7 @@
 	/* F(pin_connected) */ \
 	F(want_midi) \
 	/* F(get_time) */ \
-	/* F(process_events) */ \
+	F(process_events) \
 	/* F(set_time) */ \
 	F(tempo_at) \
 	F(get_num_automatable_parameters) \
@@ -63,7 +63,7 @@ namespace msg::master {
 	// struct pin_connected : public msg<audioMasterPinConnected> {};
 	struct want_midi : public msg<audioMasterWantMidi>, value {};
 	// struct get_time : public msg<audioMasterGetTime> {};
-	// struct process_events : public msg<audioMasterProcessEvents> {};
+	struct process_events : public msg<audioMasterProcessEvents>, payload_ptr<casted_ptr<VstEvents, vst_events_out>>, plain_ret {};
 	// struct set_time : public msg<audioMasterSetTime> {};
 	struct tempo_at : public msg<audioMasterTempoAt>, value, plain_ret {};
 	struct get_num_automatable_parameters : public msg<audioMasterGetNumAutomatableParameters>, plain_ret {};
