@@ -34,7 +34,7 @@
 	/* F(set_chunk) */ \
 	/* F(process_events) */ \
 	F(can_be_automated) \
-	/* F(string2parameter) */ \
+	F(string2parameter) \
 	/* F(get_num_program_categories) */ \
 	F(get_program_name_indexed) \
 	/* F(copy_program) */ \
@@ -116,7 +116,7 @@ namespace msg::effect {
 	// struct set_chunk : public msg<effSetChunk> {};
 	// struct process_events : public msg<effProcessEvents> {};
 	struct can_be_automated : public msg<effCanBeAutomated>, index, plain_ret {};
-	// struct string2parameter : public msg<effString2Parameter> {};
+	struct string2parameter : public msg<effString2Parameter>, index, str_in_ptr, plain_ret {};
 	// struct get_num_program_categories : public msg<effGetNumProgramCategories> {};
 	struct get_program_name_indexed : public msg<effGetProgramNameIndexed>, index, str_out_ptr<kVstMaxProgNameLen>, plain_ret {};
 	// struct copy_program : public msg<effCopyProgram> {};

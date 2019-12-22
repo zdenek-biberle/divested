@@ -38,8 +38,8 @@ namespace msg {
 	template <size_t Size>
 	using str_out_ptr = payload_ptr<casted_ptr<char, out_array<char, Size, out_array_show_str>>>;
 
-	// This is just a shortcut for payload_ptr of in_str.
-	using str_in_ptr = payload_ptr<casted_ptr<char, in_str>>;
+	// This is just a shortcut for payload_ptr of sized_in_array<char, ...>
+	using str_in_ptr = payload_ptr<casted_ptr<char, sized_in_array<char, sized_in_array_str>>>;
 
 	struct inputs {};
 	template <typename T> constexpr bool has_inputs = std::is_base_of_v<inputs, T>;

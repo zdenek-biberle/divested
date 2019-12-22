@@ -50,36 +50,66 @@ namespace msg {
 		}
 	};
 
-	/// A C-style string that works as an input to the dispatcher - it is stored
-	/// in shared memory on the way in and that's it.
-	/// TODO: I don't like all the strlen calls, perhaps store the length in shm
-	/// as well?
-	struct in_str {
+	/// Using sized_in_array to transmit C-style strings.
+	struct sized_in_array_str {
+		static inline int size(const char *ptr) {
+			return ::strlen(ptr) + 1;
+		}
+
+		static inline std::ostream &show(std::ostream &os, const char *ptr) {
+			return os << "\"" << ptr << "\"";
+		}
+	};
+
+	/// An array of elements with a dynamic size that works as an input to the
+	/// dispatcher - it is stored in shared memory on the way in and then mapped.
+	/// The pointer can be null as well.
+	template <typename T, typename Spec>
+	struct sized_in_array {
 		template <typename Ctx>
 		static void write_request(const Ctx &ctx, char *ptr) {
-			ctx.shm.write_data_array(ptr, ::strlen(ptr) + 1);
+			if (ptr) {
+				int size = Spec::size(ptr);
+				ctx.shm.write_data(size);
+				ctx.shm.write_data_array(ptr, size);
+			} else {
+				ctx.shm.template write_data<int>(~0);
+			}
 		}
 
 		template <typename Ctx>
 		static void read_request(const Ctx &ctx, char *&ptr) {
-			char *tmp_ptr;
-			ctx.shm.map_data_array(tmp_ptr, 0);
-			size_t len = ::strlen(tmp_ptr) + 1;
-			ctx.shm.map_data_array(ptr, len);
+			int size;
+			ctx.shm.read_data(size);
+
+			if (size == ~0) {
+				ptr = nullptr;
+			} else {
+				ctx.shm.map_data_array(ptr, size);
+			}
 		}
 
 		template <typename Ctx, typename Response>
 		static void write_response(const Ctx &ctx, char *ptr, const Response &response) {
-			ctx.shm.template skip_data_array<char>(::strlen(ptr) + 1);
+			int size;
+			ctx.shm.read_data(size);
+			if (size != ~0)
+				ctx.shm.template skip_data_array<char>(size);
 		}
 
 		template <typename Ctx, typename Response>
 		static void read_response(const Ctx &ctx, char *ptr, const Response &response) {
-			ctx.shm.template skip_data_array<char>(::strlen(ptr) + 1);
+			int size;
+			ctx.shm.read_data(size);
+			if (size != ~0)
+				ctx.shm.template skip_data_array<char>(::strlen(ptr) + 1);
 		}
 
 		static inline std::ostream &show_request(std::ostream &os, char *ptr) {
-			return os << "\"" << ptr << "\"";
+			if (ptr)
+				return Spec::show(os, ptr);
+			else
+				return os << "nullptr";
 		}
 
 		template <typename Response>
