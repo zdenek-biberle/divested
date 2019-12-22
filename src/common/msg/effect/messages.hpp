@@ -102,7 +102,7 @@ namespace msg::effect {
 	struct set_sample_rate : public msg<effSetSampleRate>, opt {};
 	struct set_block_size : public msg<effSetBlockSize>, value {};
 	struct mains_changed : public msg<effMainsChanged>, value {};
-	struct edit_get_rect : public msg<effEditGetRect>, payload_ptr<casted_ptr<ERect *, rect_out>>, plain_ret {};
+	struct edit_get_rect : public msg<effEditGetRect>, payload_ptr<payload::casted_ptr<ERect *, payload::rect_out>>, plain_ret {};
 	// struct edit_open : public msg<effEditOpen> {};
 	struct edit_close : public msg<effEditClose> {};
 	// struct edit_draw : public msg<effEditDraw> {};
@@ -112,9 +112,9 @@ namespace msg::effect {
 	// struct edit_top : public msg<effEditTop> {};
 	// struct edit_sleep : public msg<effEditSleep> {};
 	struct identify : public msg<effIdentify>, plain_ret {};
-	struct get_chunk : public msg<effGetChunk>, index, payload_ptr<casted_ptr<char *, chunk_out>>, plain_ret {};
+	struct get_chunk : public msg<effGetChunk>, index, payload_ptr<payload::casted_ptr<char *, payload::chunk_out>>, plain_ret {};
 	// struct set_chunk : public msg<effSetChunk> {};
-	struct process_events : public msg<effProcessEvents>, payload_ptr<casted_ptr<VstEvents, vst_events_out>>, plain_ret {};
+	struct process_events : public msg<effProcessEvents>, payload_ptr<payload::casted_ptr<VstEvents, payload::vst_events_out>>, plain_ret {};
 	struct can_be_automated : public msg<effCanBeAutomated>, index, plain_ret {};
 	struct string2parameter : public msg<effString2Parameter>, index, str_in_ptr, plain_ret {};
 	struct get_num_program_categories : public msg<effGetNumProgramCategories>, plain_ret {};
@@ -122,8 +122,8 @@ namespace msg::effect {
 	// struct copy_program : public msg<effCopyProgram> {};
 	struct connect_input : public msg<effConnectInput>, index, value, plain_ret {};
 	struct connect_output : public msg<effConnectOutput>, index, value, plain_ret {};
-	struct get_input_properties : public msg<effGetInputProperties>, index, ptr_to_1<VstPinProperties, shm_inout_1>, plain_ret {};
-	struct get_output_properies : public msg<effGetOutputProperties>, index, ptr_to_1<VstPinProperties, shm_inout_1>, plain_ret {};
+	struct get_input_properties : public msg<effGetInputProperties>, index, ptr_to_1<VstPinProperties, payload::shm_inout_1>, plain_ret {};
+	struct get_output_properies : public msg<effGetOutputProperties>, index, ptr_to_1<VstPinProperties, payload::shm_inout_1>, plain_ret {};
 	struct get_plug_category : public msg<effGetPlugCategory>, plain_ret {};
 	struct get_current_position : public msg<effGetCurrentPosition>, plain_ret {};
 	// struct get_destionation_buffer : public msg<effGetDestionationBuffer> {};
@@ -145,7 +145,7 @@ namespace msg::effect {
 	struct idle : public msg<effIdle>, plain_ret {};
 	// struct get_icon : public msg<effGetIcon> {};
 	// struct set_view_position : public msg<effSetViewPosition> {};
-	struct get_parameter_properties : public msg<effGetParameterProperties>, index, ptr_to_1<VstParameterProperties, shm_inout_1>, plain_ret {};
+	struct get_parameter_properties : public msg<effGetParameterProperties>, index, ptr_to_1<VstParameterProperties, payload::shm_inout_1>, plain_ret {};
 	// struct keys_required : public msg<effKeysRequired> {};
 	struct get_vst_version : public msg<effGetVstVersion>, plain_ret {};
 	struct edit_key_down : public msg<effEditKeyDown>, index, value, opt, plain_ret {};

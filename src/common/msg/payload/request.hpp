@@ -1,13 +1,12 @@
-#ifndef MSG_SERIALIZERS_HPP
-#define MSG_SERIALIZERS_HPP
+#ifndef MSG_PAYLOAD_REQUEST_HPP
+#define MSG_PAYLOAD_REQUEST_HPP
 
 #include <cstring>
-
 #include "common/msg/type.hpp"
 #include "common/util/str_writer.hpp"
 #include "pluginterfaces/vst2.x/aeffectx.h"
 
-namespace msg {
+namespace msg::payload {
 	template <typename Pipe, typename Shm, typename Allocator>
 	struct payload_ctx {
 		Pipe &pipe;
@@ -473,5 +472,6 @@ namespace msg {
 		
 	};
 }
+
 
 #endif

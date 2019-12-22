@@ -1,7 +1,7 @@
 #ifndef MSG_BASE_HPP
 #define MSG_BASE_HPP
 
-#include "common/msg/payload.hpp"
+#include "common/msg/payload/request.hpp"
 #include "pluginterfaces/vst2.x/aeffect.h"
 
 namespace msg {
@@ -36,14 +36,14 @@ namespace msg {
 
 	// This is just a shortcut for payload_ptr of shm_array_out<char, ...>
 	template <size_t Size>
-	using str_out_ptr = payload_ptr<casted_ptr<char, shm_array_out<char, Size, show_str>>>;
+	using str_out_ptr = payload_ptr<payload::casted_ptr<char, payload::shm_array_out<char, Size, payload::show_str>>>;
 
 	// This is just a shortcut for payload_ptr of sized_in_array<char, ...>
-	using str_in_ptr = payload_ptr<casted_ptr<char, sized_in_array<char, sized_in_array_str>>>;
+	using str_in_ptr = payload_ptr<payload::casted_ptr<char, payload::sized_in_array<char, payload::sized_in_array_str>>>;
 
 	// ptr is a pointer to a single element, used either as input, output or both
 	template <typename T, template <typename> typename ShmArray1>
-	using ptr_to_1 = payload_ptr<casted_ptr<T, ShmArray1<T>>>;
+	using ptr_to_1 = payload_ptr<payload::casted_ptr<T, ShmArray1<T>>>;
 
 	struct inputs {};
 	template <typename T> constexpr bool has_inputs = std::is_base_of_v<inputs, T>;
