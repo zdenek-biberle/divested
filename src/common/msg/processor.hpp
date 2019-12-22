@@ -60,8 +60,13 @@ namespace msg {
 		auto response = F(handler, request);
 
 		LOG_TRACE("Dispatcher called, result: " << response);
+
 		if constexpr (has_payload_ptr<T>)
 			LOG_TRACE("ptr content: " << response_writer<typename T::payload>(request.ptr, response));
+
+		if constexpr (has_payload_ret<T>)
+			LOG_TRACE("ret content: " << response_writer<typename T::return_payload>(response.response, response));
+
 
 		// TODO: cleanup response data
 		send_return_dispatcher<T>(handler, buf, shm_offset, shm.total(), request, response);

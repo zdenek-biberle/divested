@@ -71,6 +71,9 @@ namespace msg::io {
 		if constexpr (has_payload_ptr<T>)
 			T::payload::write_response(ctx, request.ptr, response);
 
+		if constexpr (has_payload_ret<T>)
+			T::return_payload::write_response(ctx, response.response, response);
+
 		if constexpr (has_inputs<T>)
 			skip_audio_arrays(ctx, request.index, request.num_inputs, request.inputs);
 
@@ -85,6 +88,9 @@ namespace msg::io {
 
 		if constexpr (has_payload_ptr<T>)
 			T::payload::read_response(ctx, request.ptr, response);
+
+		if constexpr (has_payload_ret<T>)
+			T::return_payload::read_response(ctx, response.response, response);
 
 		if constexpr (has_inputs<T>)
 			skip_audio_arrays(ctx, request.index, request.num_inputs, request.inputs);

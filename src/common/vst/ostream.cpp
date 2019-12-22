@@ -34,3 +34,22 @@ std::ostream &operator<<(std::ostream &os, const VstPinProperties& obj) {
 		OUT_STR(shortLabel)
 	OBJ_END;
 }
+
+std::ostream &operator<<(std::ostream &os, const VstTimeInfo &obj) {
+	OBJ_START(VstTimeInfo)
+		OUT(samplePos)
+		OUT(sampleRate)
+		OUT(nanoSeconds)
+		OUT(ppqPos)
+		OUT(tempo)
+		OUT(barStartPos)
+		OUT(cycleStartPos)
+		OUT(cycleEndPos)
+		OUT(timeSigNumerator)
+		OUT(timeSigDenominator)
+		OUT(smpteOffset)
+		OUT(smpteFrameRate)
+		OUT(samplesToNextClock)
+		OUT(flags)
+	OBJ_END;
+}

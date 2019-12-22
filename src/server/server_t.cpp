@@ -151,3 +151,7 @@ void server_t::run() {
 	msg::receive_message(*this, buf);
 	LOG_TRACE("Server " << index << " finished");
 }
+
+VstTimeInfo &server_t::get_time_info() {
+	return time_info;
+}

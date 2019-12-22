@@ -11,7 +11,7 @@
 	F(idle) \
 	/* F(pin_connected) */ \
 	F(want_midi) \
-	/* F(get_time) */ \
+	F(get_time) \
 	F(process_events) \
 	/* F(set_time) */ \
 	F(tempo_at) \
@@ -62,7 +62,7 @@ namespace msg::master {
 	struct idle : public msg<audioMasterIdle> {};
 	// struct pin_connected : public msg<audioMasterPinConnected> {};
 	struct want_midi : public msg<audioMasterWantMidi>, value {};
-	// struct get_time : public msg<audioMasterGetTime> {};
+	struct get_time : public msg<audioMasterGetTime>, value, payload_ret<payload::casted_ret<VstTimeInfo, payload::vst_time_info_out>> {};
 	struct process_events : public msg<audioMasterProcessEvents>, payload_ptr<payload::casted_ptr<VstEvents, payload::vst_events_out>>, plain_ret {};
 	// struct set_time : public msg<audioMasterSetTime> {};
 	struct tempo_at : public msg<audioMasterTempoAt>, value, plain_ret {};

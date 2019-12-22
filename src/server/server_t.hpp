@@ -16,6 +16,7 @@ struct server_t : public handler::with_shm {
 	const std::string &recv_base_path;
 	const std::string &shm_base_path;
 	int index;
+	VstTimeInfo time_info;
 
 	struct message_configuration {
 		using dispatcher_received = msg::effect_dispatcher;
@@ -42,6 +43,8 @@ struct server_t : public handler::with_shm {
 
 	/// Keep processing messages until a return is received
 	void run();
+
+	VstTimeInfo &get_time_info();
 };
 
 #endif

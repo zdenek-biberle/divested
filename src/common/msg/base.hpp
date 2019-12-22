@@ -2,6 +2,7 @@
 #define MSG_BASE_HPP
 
 #include "common/msg/payload/request.hpp"
+#include "common/msg/payload/response.hpp"
 #include "pluginterfaces/vst2.x/aeffect.h"
 
 namespace msg {
@@ -62,6 +63,15 @@ namespace msg {
 
 	struct plain_ret {};
 	template <typename T> constexpr bool has_plain_ret = std::is_base_of_v<plain_ret, T>;
+
+	struct payload_ret_tag {};
+
+	template <typename Payload>
+	struct payload_ret : payload_ret_tag {
+		using return_payload = Payload;
+	};
+
+	template <typename T> constexpr bool has_payload_ret = std::is_base_of_v<payload_ret_tag, T>;
 }
 
 #endif
