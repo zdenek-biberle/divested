@@ -71,10 +71,7 @@ ssize_t client_t::message_write(const char *buf, size_t len) {
 }
 
 char *client_t::allocate_chunk(size_t size) {
-	auto chunk = std::make_unique<char[]>(size);
-	auto ptr = chunk.get();
-	shared.allocated_chunks.push_back(std::move(chunk));
-	return ptr;
+	return shared.allocate_chunk(size);
 }
 
 ERect &client_t::get_rect() {

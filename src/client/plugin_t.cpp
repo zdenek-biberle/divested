@@ -87,25 +87,33 @@ plugin_t::plugin_t(const paths_t &paths, const std::string &server_path, const s
 
 client_t &plugin_t::get_client() {
 	auto tid = gettid();
-	std::lock_guard lock(primary_client_mutex); // TODO: don't lock the mutex when accessing a client that already exists
 
-	if (auto it = tid_to_client.find(tid) ; it != tid_to_client.end()) {
-		return *(it->second.get());
-	} else {
-		LOG_TRACE("Creating new server handler");
-		auto index = tid_to_client.size() + 1;
-		auto res{create_resources(base_paths, index)};
-		primary_client.instantiate_handler(index);
-		auto client = create_client(shared, std::move(res));
-		auto client_ptr = std::make_unique<client_t>(std::move(client));
-		auto [client_it, inserted] = tid_to_client.insert({tid, std::move(client_ptr)});
-
-		if (!inserted) {
-			throw std::runtime_error("Client was already in tid_to_client map");
-		}
-
-		return *(client_it->second.get());
+	{
+		// lock the map and try to find a suitable client
+		std::shared_lock lock{tid_to_client_mutex};
+		if (auto it = tid_to_client.find(tid) ; it != tid_to_client.end()) {
+			return *(it->second.get());
+		} 
 	}
+
+	// if no suitable client was found, lock the map and the primary client
+	// and instantiate a new client
+	std::lock_guard {primary_client_mutex};
+	std::unique_lock {tid_to_client_mutex};
+	
+	LOG_TRACE("Creating new server handler");
+	auto index = tid_to_client.size() + 1;
+	auto res{create_resources(base_paths, index)};
+	primary_client.instantiate_handler(index);
+	auto client = create_client(shared, std::move(res));
+	auto client_ptr = std::make_unique<client_t>(std::move(client));
+	auto [client_it, inserted] = tid_to_client.insert({tid, std::move(client_ptr)});
+
+	if (!inserted) {
+		throw std::runtime_error("Client was already in tid_to_client map");
+	}
+
+	return *(client_it->second.get());
 }
 
 static void log_proc_addresses(AEffect *eff) {

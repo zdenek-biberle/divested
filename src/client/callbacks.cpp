@@ -34,8 +34,7 @@ VstIntPtr VSTCALLBACK aeffect_dispatcher_proc(AEffect* effect, VstInt32 opcode, 
 
 	// If we got an effMainsChanged message, we can clean up allocated chunks.
 	if (opcode == effMainsChanged) {
-		LOG_TRACE("Cleaning up " << plugin.shared.allocated_chunks.size() << " allocated chunks");
-		plugin.shared.allocated_chunks.clear();
+		plugin.shared.clear_chunks();
 	}
 
 	// If we got an effClose message, we should first close all server handlers
